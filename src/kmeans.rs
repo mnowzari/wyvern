@@ -3,11 +3,11 @@ use vek::Vec3;
 use crate::image_loader;
 
 const NUM_OF_POINTS: usize = 5;
-const DATASET_DIV: usize = 4;
+const DATASET_DIV: usize = 6;
 
 pub fn k_means(file_path: String) -> String {
     let image_linear_buf = image_loader::load_image(&file_path).expect("Failed loading image!");
-    
+
     let k_points: [[f32; 3]; NUM_OF_POINTS] = generate_random_points(&image_linear_buf);
 
     for idx in 1..image_linear_buf.len()/DATASET_DIV {
@@ -21,7 +21,7 @@ pub fn k_means(file_path: String) -> String {
                 &r, &g, &b, 
                 &point[0], &point[1], &point[2]);
 
-            if distance < 20.0 {
+            if distance < 25.0 {
                 point[0] += r;
                 point[1] += g;
                 point[2] += b;

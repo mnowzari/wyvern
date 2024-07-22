@@ -191,16 +191,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cli_application"
-version = "0.1.0"
-dependencies = [
- "image",
- "rand",
- "structopt",
- "vek",
-]
-
-[[package]]
 name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1208,6 +1198,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "374ec40a2d767a3c1b4972d9475ecd557356637be906f2cb3f7fe17a6eb5e22f"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "wyvern"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "rand",
+ "structopt",
+ "vek",
 ]
 
 [[package]]
