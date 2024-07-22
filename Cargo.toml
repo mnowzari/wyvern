@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+structopt = "0.3"
+image = "0.25.1"
+rand = "0.8.5"
+vek = { version = "0.15.1", features = ["bytemuck"] }
