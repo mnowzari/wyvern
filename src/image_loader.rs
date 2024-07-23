@@ -22,8 +22,8 @@ pub fn load_image(file_path: &String) -> Result<(Vec<Vec3<f32>>, u32, u32), Box<
     Ok((linear, width, height))
 }
 
-pub fn save_image(image: Vec<Vec3<f32>>, width: u32, height: u32, file_path: String) {
-    let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image::ImageBuffer::new(width, height);
+pub fn save_image(image: Vec<Vec3<f32>>, width: u32, height: u32, file_path: String) -> Result<(), Box<dyn Error>>{
+    let mut rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image::ImageBuffer::new(width, height);
     // zip the output back into the img rgb
     image
         .into_iter()
@@ -35,4 +35,5 @@ pub fn save_image(image: Vec<Vec3<f32>>, width: u32, height: u32, file_path: Str
 
     println!("./{file_path}_modified.png");
     rgb.save(format!("{file_path}_modified.png"))?;
+    Ok(())
 }
