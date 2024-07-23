@@ -39,7 +39,7 @@ fn main() {
         _ => ImageCommand::Quit,
     };
     // run the command the user wants to execute
-    println!("{}", command_to_run.route_command(cmd_and_path.path));
+    command_to_run.route_command(cmd_and_path.path);
 }
 
 fn parse_args(arguments: Vec<String>) -> InputArguments {

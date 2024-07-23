@@ -6,7 +6,12 @@ const NUM_OF_POINTS: usize = 5;
 const DATASET_DIV: usize = 6;
 
 pub fn k_means(file_path: String) -> String {
-    let image_linear_buf = image_loader::load_image(&file_path).expect("Failed loading image!");
+    let image_data = image_loader::load_image(&file_path)
+        .expect("Failed loading image!");
+
+    let image_linear_buf: Vec<Vec3<f32>> = image_data.0;
+    let _: u32 = image_data.1; // we don't need to use width and height even though load_image() returns them
+    let _: u32 = image_data.2;
 
     let k_points: [[f32; 3]; NUM_OF_POINTS] = generate_random_points(&image_linear_buf);
 
@@ -35,7 +40,7 @@ pub fn k_means(file_path: String) -> String {
     }
 
     for kpoint in k_points {
-        println!("\n{}, {}, {}", kpoint[0], kpoint[1], kpoint[2]);
+        println!("\nR:{}, G:{}, B:{}", kpoint[0], kpoint[1], kpoint[2]);
     }
 
     file_path
