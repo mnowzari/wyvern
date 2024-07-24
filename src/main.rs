@@ -21,7 +21,7 @@ impl ImageCommand {
     fn route_command(self, file_path: String) -> String{
         match self {
             ImageCommand::EdgeDetect => {"EDGE DETECTING".to_string()},
-            ImageCommand::ImageResize => {"IMAGE RESIZING".to_string()},
+            ImageCommand::ImageResize => {image_resize::image_resize(file_path)},
             ImageCommand::Kmeans => {kmeans::k_means(file_path)},
             ImageCommand::Quit => {"QUITTING".to_string()},
         }
