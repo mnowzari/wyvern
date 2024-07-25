@@ -35,8 +35,9 @@ pub fn load_image_flattened(file_path: &String) -> Result<(Vec<Vec3<f32>>, u32, 
 pub fn save_image(image: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
         width: u32, height: u32, file_path: &String, filename_postfix: &String) -> Result<(), Box<dyn Error>>{
 
-    println!("./{file_path}_{filename_postfix}.png");
-    image.save(format!("{file_path}_{filename_postfix}.png"))?;
+    let filename: &str = get_filename_from_filepath(file_path);
+    println!("./{filename}_{filename_postfix}.png");
+    image.save(format!("{filename}_{filename_postfix}.png"))?;
     Ok(())
 }
 
@@ -53,7 +54,13 @@ pub fn save_image_flattened(image: Vec<Vec3<u8>>,
                 rgb.0 = linear.numcast().unwrap().into_array();
             });
 
-    println!("./{file_path}_{filename_postfix}.png");
+    let filename: &str = get_filename_from_filepath(file_path);
+    println!("./{filename}_{filename_postfix}.png");
     rgb.save(format!("{file_path}_{filename_postfix}.png"))?;
     Ok(())
+}
+
+fn get_filename_from_filepath(file_path: &String) -> &str {
+    let filename_vec: Vec<&str> = file_path.split(".png").collect();
+    filename_vec[0]
 }

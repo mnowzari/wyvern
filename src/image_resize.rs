@@ -48,5 +48,5 @@ fn average_pixel_values(top_right_pixel: &image::Rgb<u8>, top_left_pixel: &image
     let red_avg: u32 = (top_right_pixel[0] as u32 + top_left_pixel[0] as u32 + bottom_right_pixel[0] as u32 + bottom_left_pixel[0] as u32) / 4;
     let gre_avg: u32 = (top_right_pixel[1] as u32 + top_left_pixel[1] as u32 + bottom_right_pixel[1] as u32 + bottom_left_pixel[1] as u32) / 4;
     let blu_avg: u32 = (top_right_pixel[2] as u32 + top_left_pixel[2] as u32 + bottom_right_pixel[2] as u32 + bottom_left_pixel[2] as u32) / 4;
-    image::Rgb([(red_avg % 255) as u8, (gre_avg % 255) as u8, (blu_avg % 255) as u8])
+    image::Rgb([red_avg as u8, gre_avg as u8, blu_avg as u8])
 }
