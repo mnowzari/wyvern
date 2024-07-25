@@ -8,10 +8,8 @@ mod kmeans;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct InputArguments {
-    #[arg(short, long)]
-    command: String,
-    #[arg(short, long)]
-    path: String,
+    command: Option<String>,
+    path: Option<String>,
 }
 
 enum ImageCommand {
@@ -36,11 +34,16 @@ fn main() {
     let args: InputArguments = InputArguments::parse();
 
     let command_to_run: ImageCommand = match args.command {
-        x if x=="kmeans" => ImageCommand::Kmeans,
-        x if x=="image_resize" => ImageCommand::ImageResize,
-        x if x=="edge_detect" => ImageCommand::EdgeDetect,
-        _ => ImageCommand::Quit,
+        None => ImageCommand::Quit,
+        Some(x) => {
+            if x == "kmeans" {ImageCommand::Kmeans}
+            else if x == "image_resize" {ImageCommand::ImageResize}
+            else if x == "edge_detect" {ImageCommand::EdgeDetect}
+            else {ImageCommand::Quit}
+        }
     };
     // run the command the user wants to execute
-    command_to_run.route_command(args.path);
+    command_to_run.route_command(args
+        .path
+        .expect("No path given!"));
 }
