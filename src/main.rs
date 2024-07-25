@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_variables)]
 use std::env;
 
-mod image_loader;
+mod rw_image;
 mod image_resize;
 mod kmeans;
 

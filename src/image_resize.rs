@@ -1,10 +1,10 @@
-use crate::image_loader;
+use crate::rw_image;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
 pub fn image_resize(file_path: String) -> String {
     // main resizing function
-    let image_data = image_loader::load_image(&file_path)
+    let image_data = rw_image::load_image(&file_path)
         .expect("Failed loading image!");
 
     let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;
@@ -38,7 +38,7 @@ pub fn image_resize(file_path: String) -> String {
         i += 2;
     }
 
-    let _ = image_loader::save_image(output_buf, width, height, &file_path, &"minimized".to_string());
+    let _ = rw_image::save_image(output_buf, width, height, &file_path, &"minimized".to_string());
     file_path
 }
 

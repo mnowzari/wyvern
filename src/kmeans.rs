@@ -1,11 +1,11 @@
 use rand::Rng;
 use vek::Vec3;
-use crate::image_loader;
+use crate::rw_image;
 
 const NUM_OF_POINTS: usize = 5;
 
 pub fn k_means(file_path: String) -> String {
-    let image_data = image_loader::load_image_flattened(&file_path)
+    let image_data = rw_image::load_image_flattened(&file_path)
         .expect("Failed loading image!");
 
     let image_linear_buf: Vec<Vec3<f32>> = image_data.0;
