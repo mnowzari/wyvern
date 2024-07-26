@@ -43,7 +43,7 @@ impl ImageCommand {
                     .expect("No path!"))
             },
             ImageCommand::Kmeans => {
-                kmeans::k_means(arguments
+                kmeans::k_means_fast(arguments
                     .path
                     .expect("No path!"))
             },
