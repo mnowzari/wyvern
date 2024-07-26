@@ -4,12 +4,20 @@ use clap::Parser;
 mod rw_image;
 mod image_resize;
 mod kmeans;
+mod edge_detect;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct InputArguments {
     command: Option<String>,
     path: Option<String>,
+    #[arg(short, long)]
+    #[arg(help="threshold for edge detection only")]
+    threshold: Option<f32>,
+    #[arg(short, long)]
+    #[arg(default_value_t = false)]
+    #[arg(help="blackout non-edge pixels in edge detect")]
+    blackout: bool,
 }
 
 enum ImageCommand {
@@ -20,11 +28,25 @@ enum ImageCommand {
 }
 
 impl ImageCommand {
-    fn route_command(self, file_path: String) -> String{
+    fn route_command(self, arguments: InputArguments) -> String{
         match self {
-            ImageCommand::EdgeDetect => {"EDGE DETECTING".to_string()},
-            ImageCommand::ImageResize => {image_resize::image_resize(file_path)},
-            ImageCommand::Kmeans => {kmeans::k_means(file_path)},
+            ImageCommand::EdgeDetect => {
+                edge_detect::edge_detect(arguments
+                    .path
+                    .expect("No path!"), 
+                arguments.threshold.expect("No threshold!"), 
+                arguments.blackout)
+            },
+            ImageCommand::ImageResize => {
+                image_resize::image_resize(arguments
+                    .path
+                    .expect("No path!"))
+            },
+            ImageCommand::Kmeans => {
+                kmeans::k_means(arguments
+                    .path
+                    .expect("No path!"))
+            },
             ImageCommand::Quit => {"QUITTING".to_string()},
         }
     }
@@ -33,7 +55,7 @@ impl ImageCommand {
 fn main() {
     let args: InputArguments = InputArguments::parse();
 
-    let command_to_run: ImageCommand = match args.command {
+    let command_to_run: ImageCommand = match &args.command {
         None => ImageCommand::Quit,
         Some(x) => {
             if x == "kmeans" {ImageCommand::Kmeans}
@@ -43,7 +65,5 @@ fn main() {
         }
     };
     // run the command the user wants to execute
-    command_to_run.route_command(args
-        .path
-        .expect("No path given!"));
+    command_to_run.route_command(args);
 }

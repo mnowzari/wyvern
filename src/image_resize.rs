@@ -13,7 +13,6 @@ pub fn image_resize(file_path: String) -> String {
     let mut output_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image::ImageBuffer::new(
         width/DOWNSCALE_FACTOR, height/DOWNSCALE_FACTOR);
 
-    let mask: i32 = 0x3f3f3f;
     let mut i: u32 = 1;
     while i < width-1 {
         let mut k: u32 = 1;

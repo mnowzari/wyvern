@@ -8,8 +8,8 @@ pub fn load_image(file_path: &String) -> Result<(image::ImageBuffer<image::Rgb<u
     let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = Reader::open(file_path)?
         .decode()?
         .into_rgb8();
-    let width = rgb.width();
-    let height = rgb.height();
+    let width: u32 = rgb.width();
+    let height: u32 = rgb.height();
     Ok((rgb, width, height))
 }
 

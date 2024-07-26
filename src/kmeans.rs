@@ -59,5 +59,8 @@ fn generate_random_points(image_linear_buf: &Vec<Vec3<f32>>) -> [[f32; 3]; NUM_O
 }
 
 fn calc_distance(r1: &f32, g1: &f32, b1: &f32, r2: &f32, g2: &f32, b2: &f32) -> f32{
-    f32::sqrt(f32::powf(r1-r2, 2.0) + f32::powf(g1-g2, 2.0) + f32::powf(b1-b2, 2.0))
+    f32::sqrt(
+        f32::powf(r1-r2, 2.0) + 
+        f32::powf(g1-g2, 2.0) + 
+        f32::powf(b1-b2, 2.0))
 }
