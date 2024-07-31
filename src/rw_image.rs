@@ -45,12 +45,16 @@ impl ImageFileDetails {
             .parent()
             .unwrap()
             .as_os_str();
-        let file_ext: &OsStr = path
-            .extension()
-            .unwrap();
-        let file_name: &OsStr = path
-            .file_stem()
-            .unwrap();
+
+        let file_ext: &OsStr = match path.extension() {
+            Some(x) => x,
+            None => &OsStr::new(""),
+        };
+
+        let file_name: &OsStr = match path.file_stem() {
+            Some(x) => x,
+            None => &OsStr::new(""),
+        };
     
         ImageFileDetails {
             filepath: path.as_os_str().to_os_string(),
