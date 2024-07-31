@@ -3,7 +3,7 @@ use crate::rw_image;
 const GREEN_HIGHLIGHT_PX: image::Rgb<u8> = image::Rgb([0, 255, 0]);
 const BLACKOUT_PX: image::Rgb<u8> = image::Rgb([0, 0, 0]);
 
-pub fn edge_detect(file_path: String, threshold: f32, blackout: bool) -> String{
+pub fn edge_detect(file_path: String, threshold: f32, blackout: bool) {
     // main edge detection function
     let image_data = rw_image::load_image(&file_path)
         .expect("Failed loading image!");
@@ -42,6 +42,7 @@ pub fn edge_detect(file_path: String, threshold: f32, blackout: bool) -> String{
                 image_buf.put_pixel(i-1, k-1, GREEN_HIGHLIGHT_PX );
                 image_buf.put_pixel(i, k, GREEN_HIGHLIGHT_PX );
                 image_buf.put_pixel(i, k-1, GREEN_HIGHLIGHT_PX );
+
             }
             else if blackout {
                 image_buf.put_pixel(i-1, k, BLACKOUT_PX);
@@ -56,7 +57,6 @@ pub fn edge_detect(file_path: String, threshold: f32, blackout: bool) -> String{
     }
 
     let _ = rw_image::save_image(image_buf, width, height, &file_path, &"edges".to_string());
-    file_path
 }
 
 fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {

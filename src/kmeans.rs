@@ -3,9 +3,9 @@ use vek::Vec3;
 use crate::rw_image;
 
 const NUM_OF_POINTS: usize = 20;
-const SUBDIV_FOR_FAST_KMEANS: f32 = 4.0;
+const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
 
-pub fn k_means_fast(file_path: String) -> String {
+pub fn k_means_fast(file_path: String) {
     let image_data = rw_image::load_image(&file_path)
         .expect("Failed loading image!");
 
@@ -58,8 +58,6 @@ pub fn k_means_fast(file_path: String) -> String {
     for grid_color in grid_results {
         println!("R:{} G:{} B:{}", grid_color[0] as u8, grid_color[1] as u8, grid_color[2] as u8);
     }
-
-    file_path
 }
 
 pub fn k_means(file_path: String) -> String {

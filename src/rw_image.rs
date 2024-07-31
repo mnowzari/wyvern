@@ -61,6 +61,6 @@ pub fn save_image_flattened(image: Vec<Vec3<u8>>,
 }
 
 fn get_filename_from_filepath(file_path: &String) -> &str {
-    let filename_vec: Vec<&str> = file_path.split(".png").collect();
+    let filename_vec: Vec<&str> = file_path.split(".").collect();
     filename_vec[0]
 }

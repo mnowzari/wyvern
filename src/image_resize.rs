@@ -2,7 +2,7 @@ use crate::rw_image;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
-pub fn image_resize(file_path: String) -> String {
+pub fn image_resize(file_path: String, mut save_path: String) {
     // main resizing function
     let image_data = rw_image::load_image(&file_path)
         .expect("Failed loading image!");
@@ -37,8 +37,11 @@ pub fn image_resize(file_path: String) -> String {
         i += 2;
     }
 
-    let _ = rw_image::save_image(output_buf, width, height, &file_path, &"minimized".to_string());
-    file_path
+    // when we run this as a standalone command we don't need to specify a save path
+    if save_path == "" {
+        save_path = file_path.clone();
+    }
+    let _ = rw_image::save_image(output_buf, width, height, &save_path, &"minimized".to_string());
 }
 
 fn average_pixel_values(top_right_pixel: &image::Rgb<u8>, top_left_pixel: &image::Rgb<u8>, 
