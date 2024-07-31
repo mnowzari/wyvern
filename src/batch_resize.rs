@@ -16,7 +16,7 @@ pub fn batch_resize(directory: String, file_format: String) {
     for entry in glob(pattern.as_str()).expect("Failed to read directory path!") {
         match entry {
             Ok(path) => {
-                get_filename_from_path(path);
+                // get_filename_from_path(path);
                 // image_resize(path, format!("{}\\{}", resized_images_base_dir, ))
             },
             Err(e) => println!("{:?}", e),

@@ -5,9 +5,11 @@ use crate::rw_image;
 const NUM_OF_POINTS: usize = 20;
 const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
 
-pub fn k_means_fast(file_path: String) {
-    let image_data = rw_image::load_image(&file_path)
-        .expect("Failed loading image!");
+pub fn k_means_fast(image_file: rw_image::ImageFileDetails) {
+    // let image_data = rw_image::load_image(&file_path)
+    //     .expect("Failed loading image!");
+    let image_data: (image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32) = image_file.load_image()
+        .expect("Failure loading image!");
 
     let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;
     let width: u32 = image_data.1;
@@ -60,47 +62,6 @@ pub fn k_means_fast(file_path: String) {
     }
 }
 
-pub fn k_means(file_path: String) -> String {
-    let image_data = rw_image::load_image_flattened(&file_path)
-        .expect("Failed loading image!");
-
-    let image_linear_buf: Vec<Vec3<f32>> = image_data.0;
-    let _: u32 = image_data.1; // we don't need to use width and height even though load_image() returns them
-    let _: u32 = image_data.2;
-
-    let k_points: [[f32; 3]; NUM_OF_POINTS] = generate_random_points_from_linear_buf(&image_linear_buf);
-
-    for idx in 1..image_linear_buf.len() {
-        let r: f32 = image_linear_buf[idx][0];
-        let g: f32 = image_linear_buf[idx][1];
-        let b: f32 = image_linear_buf[idx][2];
-        // calulcate disance between curr pixel and every kmeans point
-        for mut point in k_points {
-
-            let distance = calc_distance(
-                &r, &g, &b, 
-                &point[0], &point[1], &point[2]);
-
-            if distance < 10.0 {
-                point[0] += r;
-                point[1] += g;
-                point[2] += b;
-            }
-            else {
-                point[0] -= r;
-                point[1] -= g;
-                point[2] -= b;
-            }
-        }
-    }
-
-    for kpoint in k_points {
-        println!("\nR:{}, G:{}, B:{}", kpoint[0], kpoint[1], kpoint[2]);
-    }
-
-    file_path
-}
-
 fn generate_random_points_for_grid(image_buf: &image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
         k: u32, i: u32, grid_dim_width: u32, grid_dim_height: u32) -> [[f32; 3]; NUM_OF_POINTS] {
 
@@ -136,3 +97,44 @@ fn calc_distance(r1: &f32, g1: &f32, b1: &f32, r2: &f32, g2: &f32, b2: &f32) -> 
         f32::powf(g1-g2, 2.0) + 
         f32::powf(b1-b2, 2.0))
 }
+
+// pub fn k_means(file_path: String) -> String {
+//     let image_data = rw_image::load_image_flattened(&file_path)
+//         .expect("Failed loading image!");
+
+//     let image_linear_buf: Vec<Vec3<f32>> = image_data.0;
+//     let _: u32 = image_data.1; // we don't need to use width and height even though load_image() returns them
+//     let _: u32 = image_data.2;
+
+//     let k_points: [[f32; 3]; NUM_OF_POINTS] = generate_random_points_from_linear_buf(&image_linear_buf);
+
+//     for idx in 1..image_linear_buf.len() {
+//         let r: f32 = image_linear_buf[idx][0];
+//         let g: f32 = image_linear_buf[idx][1];
+//         let b: f32 = image_linear_buf[idx][2];
+//         // calulcate disance between curr pixel and every kmeans point
+//         for mut point in k_points {
+
+//             let distance = calc_distance(
+//                 &r, &g, &b, 
+//                 &point[0], &point[1], &point[2]);
+
+//             if distance < 10.0 {
+//                 point[0] += r;
+//                 point[1] += g;
+//                 point[2] += b;
+//             }
+//             else {
+//                 point[0] -= r;
+//                 point[1] -= g;
+//                 point[2] -= b;
+//             }
+//         }
+//     }
+
+//     for kpoint in k_points {
+//         println!("\nR:{}, G:{}, B:{}", kpoint[0], kpoint[1], kpoint[2]);
+//     }
+
+//     file_path
+// }

@@ -1,11 +1,12 @@
-use crate::rw_image;
+use crate::rw_image::ImageFileDetails;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
-pub fn image_resize(file_path: String, mut save_path: String) {
+pub fn image_resize(image_file: ImageFileDetails) {
     // main resizing function
-    let image_data = rw_image::load_image(&file_path)
-        .expect("Failed loading image!");
+    // let image_data = rw_image::load_image(&file_path)
+    //     .expect("Failed loading image!");
+    let image_data: (image::ImageBuffer<image::Rgb<u8>,Vec<u8>>, u32, u32) = image_file.load_image().expect("Failure loading image!");
 
     let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;
     let width: u32 = image_data.1;
@@ -36,12 +37,8 @@ pub fn image_resize(file_path: String, mut save_path: String) {
         }
         i += 2;
     }
-
-    // when we run this as a standalone command we don't need to specify a save path
-    if save_path == "" {
-        save_path = file_path.clone();
-    }
-    let _ = rw_image::save_image(output_buf, width, height, &save_path, &"minimized".to_string());
+    // let _ = rw_image::save_image(output_buf, width, height, &save_path, &"minimized".to_string());
+    let _ = image_file.save_image(image_buf, width, height, &"minimized");
 }
 
 fn average_pixel_values(top_right_pixel: &image::Rgb<u8>, top_left_pixel: &image::Rgb<u8>, 

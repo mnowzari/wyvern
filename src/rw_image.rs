@@ -1,66 +1,62 @@
-use image::io::Reader;
-use vek::Vec3;
 use std::error::Error;
+use std::ffi::OsString;
+use std::path::PathBuf;
+use std::ffi::OsStr;
 
-pub fn load_image(file_path: &String) -> Result<(image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32),
-        Box<dyn Error>> {
-    // let img = Reader::open(file_path)?.decode()?;
-    let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = Reader::open(file_path)?
-        .decode()?
-        .into_rgb8();
-    let width: u32 = rgb.width();
-    let height: u32 = rgb.height();
-    Ok((rgb, width, height))
+// use clap::builder::OsStr;
+use image::io::Reader;
+
+pub struct ImageFileDetails {
+    filepath: OsString, // complete filepath as given by user
+    basedir: OsString, // base directory
+    filename: OsString, // file name without extension
+    extension: OsString, // extension of the given file
 }
 
-pub fn load_image_flattened(file_path: &String) -> Result<(Vec<Vec3<f32>>, u32, u32), Box<dyn Error>> {
-    let img = Reader::open(file_path)?.decode()?;
+impl ImageFileDetails {
 
-    let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = img.into_rgb8();
-    let width: u32 = rgb.width();
-    let height: u32 = rgb.height();
+    pub fn load_image(&self) -> Result<(image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32), Box<dyn Error>> {
+        let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = Reader::open(&self.filepath)?
+            .decode()?
+            .into_rgb8();
+        let width: u32 = rgb.width();
+        let height: u32 = rgb.height();
+        Ok((rgb, width, height))
+    }
 
-    let mut linear: Vec<Vec3<f32>> = vec![Vec3::<f32>::zero(); (width*height) as usize];
+    pub fn save_image(self, image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, 
+        width: u32, height: u32, filename_postfix: &str) -> Result<(), Box<dyn Error>>{
 
-    // zip the pixels into the linear buffer we created above
-    rgb.pixels()
-        .zip(linear.iter_mut())
-        .for_each(|(rgb, linear)| {
-            let rgbvec = Vec3::<u8>::from(rgb.0);
-            *linear = rgbvec.numcast::<f32>().unwrap();
-        });
-    Ok((linear, width, height))
-}
+        let save_path: OsString = OsString::from(
+            format!("{}\\{}_{}.{}", 
+                self.basedir.to_str().unwrap(),
+                self.filename.to_str().unwrap(),
+                filename_postfix,
+                self.extension.to_str().unwrap())
+        );
+        println!("{}", save_path.to_str().unwrap());
+        image_buf.save(save_path)?;
+        Ok(())
+    }
 
-pub fn save_image(image: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
-        width: u32, height: u32, file_path: &String, filename_postfix: &String) -> Result<(), Box<dyn Error>>{
-
-    let filename: &str = get_filename_from_filepath(file_path);
-    println!("./{filename}_{filename_postfix}.png");
-    image.save(format!("{filename}_{filename_postfix}.png"))?;
-    Ok(())
-}
-
-pub fn save_image_flattened(image: Vec<Vec3<u8>>,
-        width: u32, height: u32, file_path: &String, filename_postfix: &String) -> Result<(), Box<dyn Error>>{
-
-    let mut rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image::ImageBuffer::new(width, height);
-    // zip the input image linear buffer back into rgb
-    image
-        .into_iter()
-            .zip(rgb.pixels_mut())
-            .for_each(|(linear, rgb)| {
-                // let transformed = (linear * 255.0).clamped(0.0, 255.0);
-                rgb.0 = linear.numcast().unwrap().into_array();
-            });
-
-    let filename: &str = get_filename_from_filepath(file_path);
-    println!("./{filename}_{filename_postfix}.png");
-    rgb.save(format!("{file_path}_{filename_postfix}.png"))?;
-    Ok(())
-}
-
-fn get_filename_from_filepath(file_path: &String) -> &str {
-    let filename_vec: Vec<&str> = file_path.split(".").collect();
-    filename_vec[0]
+    pub fn get_filename_and_format(file_path: &String) -> ImageFileDetails {
+        let path: PathBuf = PathBuf::from(file_path);
+        let base_dir: &OsStr = path
+            .parent()
+            .unwrap()
+            .as_os_str();
+        let file_ext: &OsStr = path
+            .extension()
+            .unwrap();
+        let file_name: &OsStr = path
+            .file_stem()
+            .unwrap();
+    
+        ImageFileDetails {
+            filepath: path.as_os_str().to_os_string(),
+            basedir: base_dir.to_os_string(),
+            filename: file_name.to_os_string(),
+            extension: file_ext.to_os_string(),
+        }
+    }
 }

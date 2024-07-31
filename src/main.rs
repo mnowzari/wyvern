@@ -28,7 +28,7 @@ struct InputArguments {
 
     #[arg(long)]
     #[arg(help="File format to filter by for batch resizing")]
-    fileformat: Option<String>,
+    extension: Option<String>,
 }
 
 #[derive(Subcommand)]
@@ -41,25 +41,22 @@ enum ImageCommand {
 }
 
 fn route_command(arguments: InputArguments) {
+    let image_details: rw_image::ImageFileDetails = rw_image::ImageFileDetails::get_filename_and_format(
+        arguments.path.as_ref().expect("No path!"));
+
     match arguments.command {
         ImageCommand::EdgeDetect => {
-            edge_detect::edge_detect(
-            arguments.path.expect("No path!"), 
-            arguments.threshold,
-            arguments.blackout);
+            edge_detect::edge_detect(image_details, arguments.threshold, arguments.blackout);
         },
         ImageCommand::ImageResize => {
-            image_resize::image_resize(arguments
-                .path.expect("No path!"), "".to_string());
+            image_resize::image_resize(image_details);
         },
         ImageCommand::Kmeans => {
-            kmeans::k_means_fast(arguments
-                .path.expect("No path!"));
+            kmeans::k_means_fast(image_details);
         },
         ImageCommand::BatchResize => {
-            batch_resize::batch_resize(arguments
-                .path.expect("No path!"),
-                arguments.fileformat.expect("No file format provided!"));
+            batch_resize::batch_resize(arguments.path.expect("No path!"),
+                arguments.extension.expect("No file format provided!"));
         }
         ImageCommand::Quit => {
             println!("QUITTING");
