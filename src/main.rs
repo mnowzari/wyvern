@@ -1,4 +1,3 @@
-#![allow(dead_code, unused_variables)]
 use clap::{Parser, Subcommand};
 
 mod rw_image;
@@ -8,55 +7,87 @@ mod kmeans;
 mod edge_detect;
 
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
-#[command(propagate_version = true)]
+#[command(
+    version,
+    about,
+    long_about = None,
+    propagate_version = true
+)]
 struct InputArguments {
     #[command(subcommand)]
     command: ImageCommand,
-
-    path: Option<String>,
-
-    #[arg(long)]
-    #[arg(default_value_t = 30.0)]
-    #[arg(help="threshold for edge detection.")]
-    threshold: f32,
-
-    #[arg(long)]
-    #[arg(default_value_t = false)]
-    #[arg(help="blackout non-edge pixels in edge detection. Default is False.")]
-    blackout: bool,
-
-    #[arg(long)]
-    #[arg(help="File format to filter by for batch resizing")]
-    extension: Option<String>,
 }
 
 #[derive(Subcommand)]
 enum ImageCommand {
-    Kmeans,
-    ImageResize,
-    EdgeDetect,
-    BatchResize,
+    ImageResize {
+        path: Option<String>,
+    },
+
+    Kmeans {
+        path: Option<String>,
+    },
+
+    EdgeDetect {
+        path: Option<String>,
+
+        #[arg(
+            long,
+            default_value_t = 30.0,
+            help="Threshold for edge detection."
+        )]
+        threshold: f32,
+
+        #[arg(
+            long,
+            default_value_t = false,
+            help="Blackout non-edge pixels in edge detection. Default is False."
+        )]
+        blackout: bool,
+    },
+
+    BatchResize {
+        path: Option<String>,
+
+        #[arg(
+            long,
+            help="File format to filter by for batch resizing."
+        )]
+        extension: Option<String>,
+    },
+
     Quit,
 }
 
-fn route_command(arguments: InputArguments) {
-    let image_details: rw_image::ImageFileDetails = rw_image::ImageFileDetails::get_filename_and_format(
-        arguments.path.as_ref().expect("No path!"));
+fn route_command(args: InputArguments) {
 
-    match arguments.command {
-        ImageCommand::EdgeDetect => {
-            edge_detect::edge_detect(image_details, arguments.threshold, arguments.blackout);
+    match args.command {
+        ImageCommand::EdgeDetect {path, threshold, blackout} => {
+            edge_detect::edge_detect(
+                rw_image::ImageDetails::get_filename_and_format(path
+                    .as_ref()
+                    .expect("No path!")),
+                threshold,
+                blackout);
         },
-        ImageCommand::ImageResize => {
-            image_resize::image_resize(image_details);
+        ImageCommand::ImageResize {path} => {
+            image_resize::image_resize(
+                rw_image::ImageDetails::get_filename_and_format(path
+                    .as_ref()
+                    .expect("No path!"))
+            );
         },
-        ImageCommand::Kmeans => {
-            kmeans::k_means_fast(image_details);
+        ImageCommand::Kmeans {path} => {
+            kmeans::k_means_fast(
+                rw_image::ImageDetails::get_filename_and_format(path
+                    .as_ref()
+                    .expect("No path!"))
+            );
         },
-        ImageCommand::BatchResize => {
-            batch_resize::batch_resize(arguments.path.expect("No path!"),
-                arguments.extension.expect("No file format provided!"));
+        ImageCommand::BatchResize {path, extension} => {
+            batch_resize::batch_resize(
+                path.expect("No path!"), 
+                extension.expect("No file format provided!"));
         }
         ImageCommand::Quit => {
             println!("QUITTING");

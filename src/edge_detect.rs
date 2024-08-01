@@ -1,9 +1,9 @@
-use crate::rw_image::ImageFileDetails;
+use crate::rw_image::ImageDetails;
 
 const GREEN_HIGHLIGHT_PX: image::Rgb<u8> = image::Rgb([0, 255, 0]);
 const BLACKOUT_PX: image::Rgb<u8> = image::Rgb([0, 0, 0]);
 
-pub fn edge_detect(image_file: ImageFileDetails, threshold: f32, blackout: bool) {
+pub fn edge_detect(image_file: ImageDetails, threshold: f32, blackout: bool) {
     // main edge detection function
     // let image_data = rw_image::load_image(&file_path)
     //     .expect("Failed loading image!");
@@ -56,7 +56,7 @@ pub fn edge_detect(image_file: ImageFileDetails, threshold: f32, blackout: bool)
         }
         i += 2;
     }
-    let _ = image_file.save_image(image_buf, width, height, &"edges");
+    let _ = image_file.save_image(image_buf, &"edges");
 }
 
 fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {

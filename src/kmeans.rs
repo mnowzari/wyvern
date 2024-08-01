@@ -1,11 +1,10 @@
 use rand::Rng;
-use vek::Vec3;
 use crate::rw_image;
 
 const NUM_OF_POINTS: usize = 20;
 const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
 
-pub fn k_means_fast(image_file: rw_image::ImageFileDetails) {
+pub fn k_means_fast(image_file: rw_image::ImageDetails) {
     // let image_data = rw_image::load_image(&file_path)
     //     .expect("Failed loading image!");
     let image_data: (image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32) = image_file.load_image()
@@ -78,19 +77,6 @@ fn generate_random_points_for_grid(image_buf: &image::ImageBuffer<image::Rgb<u8>
     k_points
 }
 
-fn generate_random_points_from_linear_buf(image_linear_buf: &Vec<Vec3<f32>>) -> [[f32; 3]; NUM_OF_POINTS] {
-    let mut k_points: [[f32; 3]; NUM_OF_POINTS] = [[0.0; 3]; NUM_OF_POINTS];
-
-    for i in 0..k_points.len() {
-        let coord: usize = rand::thread_rng().gen_range(0..image_linear_buf.len());
-        let r: f32 = image_linear_buf[coord][0];
-        let g: f32 = image_linear_buf[coord][1];
-        let b: f32 = image_linear_buf[coord][2];
-        k_points[i] = [r, g, b];
-    }
-    k_points
-}
-
 fn calc_distance(r1: &f32, g1: &f32, b1: &f32, r2: &f32, g2: &f32, b2: &f32) -> f32 {
     f32::sqrt(
         f32::powf(r1-r2, 2.0) + 
@@ -137,4 +123,17 @@ fn calc_distance(r1: &f32, g1: &f32, b1: &f32, r2: &f32, g2: &f32, b2: &f32) -> 
 //     }
 
 //     file_path
+// }
+
+// fn generate_random_points_from_linear_buf(image_linear_buf: &Vec<Vec3<f32>>) -> [[f32; 3]; NUM_OF_POINTS] {
+//     let mut k_points: [[f32; 3]; NUM_OF_POINTS] = [[0.0; 3]; NUM_OF_POINTS];
+
+//     for i in 0..k_points.len() {
+//         let coord: usize = rand::thread_rng().gen_range(0..image_linear_buf.len());
+//         let r: f32 = image_linear_buf[coord][0];
+//         let g: f32 = image_linear_buf[coord][1];
+//         let b: f32 = image_linear_buf[coord][2];
+//         k_points[i] = [r, g, b];
+//     }
+//     k_points
 // }

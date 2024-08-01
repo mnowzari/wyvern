@@ -6,14 +6,14 @@ use std::ffi::OsStr;
 // use clap::builder::OsStr;
 use image::io::Reader;
 
-pub struct ImageFileDetails {
+pub struct ImageDetails {
     filepath: OsString, // complete filepath as given by user
     basedir: OsString, // base directory
     filename: OsString, // file name without extension
     extension: OsString, // extension of the given file
 }
 
-impl ImageFileDetails {
+impl ImageDetails {
 
     pub fn load_image(&self) -> Result<(image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32), Box<dyn Error>> {
         let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = Reader::open(&self.filepath)?
@@ -24,8 +24,7 @@ impl ImageFileDetails {
         Ok((rgb, width, height))
     }
 
-    pub fn save_image(self, image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, 
-        width: u32, height: u32, filename_postfix: &str) -> Result<(), Box<dyn Error>>{
+    pub fn save_image(self, image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,filename_postfix: &str) -> Result<(), Box<dyn Error>>{
 
         let save_path: OsString = OsString::from(
             format!("{}\\{}_{}.{}", 
@@ -39,7 +38,7 @@ impl ImageFileDetails {
         Ok(())
     }
 
-    pub fn get_filename_and_format(file_path: &String) -> ImageFileDetails {
+    pub fn get_filename_and_format(file_path: &String) -> ImageDetails {
         let path: PathBuf = PathBuf::from(file_path);
         let base_dir: &OsStr = path
             .parent()
@@ -56,7 +55,7 @@ impl ImageFileDetails {
             None => &OsStr::new(""),
         };
     
-        ImageFileDetails {
+        ImageDetails {
             filepath: path.as_os_str().to_os_string(),
             basedir: base_dir.to_os_string(),
             filename: file_name.to_os_string(),
@@ -64,3 +63,14 @@ impl ImageFileDetails {
         }
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn it_works() {
+//         let result = add(2, 2);
+//         assert_eq!(result, 4);
+//     }
+// }

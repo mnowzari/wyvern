@@ -26,8 +26,3 @@ pub fn batch_resize(directory: String, file_format: String) {
         }
     }
 }
-
-fn get_filename_from_path(path: &String) -> String {
-    let tokens: std::str::Split<&str> = path.split("\\");
-    path.to_string()
-}

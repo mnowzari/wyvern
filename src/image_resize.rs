@@ -1,8 +1,8 @@
-use crate::rw_image::ImageFileDetails;
+use crate::rw_image::ImageDetails;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
-pub fn image_resize(image_file: ImageFileDetails) {
+pub fn image_resize(image_file: ImageDetails) {
     // main resizing function
     // let image_data = rw_image::load_image(&file_path)
     //     .expect("Failed loading image!");
@@ -38,7 +38,7 @@ pub fn image_resize(image_file: ImageFileDetails) {
         i += 2;
     }
     // let _ = rw_image::save_image(output_buf, width, height, &save_path, &"minimized".to_string());
-    let _ = image_file.save_image(image_buf, width, height, &"minimized");
+    let _ = image_file.save_image(image_buf, &"minimized");
 }
 
 fn average_pixel_values(top_right_pixel: &image::Rgb<u8>, top_left_pixel: &image::Rgb<u8>, 
