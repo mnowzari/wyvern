@@ -1,11 +1,10 @@
+use std::error::Error;
 use crate::rw_image::ImageDetails;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
-pub fn image_resize(image_file: ImageDetails) {
+pub fn image_resize(image_file: ImageDetails) -> Result<(), Box<dyn Error>> {
     // main resizing function
-    // let image_data = rw_image::load_image(&file_path)
-    //     .expect("Failed loading image!");
     let image_data: (image::ImageBuffer<image::Rgb<u8>,Vec<u8>>, u32, u32) = image_file.load_image().expect("Failure loading image!");
 
     let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;
@@ -37,8 +36,8 @@ pub fn image_resize(image_file: ImageDetails) {
         }
         i += 2;
     }
-    // let _ = rw_image::save_image(output_buf, width, height, &save_path, &"minimized".to_string());
-    let _ = image_file.save_image(image_buf, &"minimized");
+
+    image_file.save_image(output_buf, &"minimized")
 }
 
 fn average_pixel_values(top_right_pixel: &image::Rgb<u8>, top_left_pixel: &image::Rgb<u8>, 

@@ -21,14 +21,17 @@ struct InputArguments {
 #[derive(Subcommand)]
 enum ImageCommand {
     ImageResize {
+        #[arg(required = true)]
         path: Option<String>,
     },
 
     Kmeans {
+        #[arg(required = true)]
         path: Option<String>,
     },
 
     EdgeDetect {
+        #[arg(required = true)]
         path: Option<String>,
 
         #[arg(
@@ -41,22 +44,21 @@ enum ImageCommand {
         #[arg(
             long,
             default_value_t = false,
-            help="Blackout non-edge pixels in edge detection. Default is False."
+            help="Blackout non-edge pixels in edge detection."
         )]
         blackout: bool,
     },
 
     BatchResize {
+        #[arg(required = true)]
         path: Option<String>,
 
         #[arg(
-            long,
+            required = true,
             help="File format to filter by for batch resizing."
         )]
         extension: Option<String>,
     },
-
-    Quit,
 }
 
 fn route_command(args: InputArguments) {
@@ -71,7 +73,7 @@ fn route_command(args: InputArguments) {
                 blackout);
         },
         ImageCommand::ImageResize {path} => {
-            image_resize::image_resize(
+            let _ = image_resize::image_resize(
                 rw_image::ImageDetails::get_filename_and_format(path
                     .as_ref()
                     .expect("No path!"))
@@ -89,9 +91,6 @@ fn route_command(args: InputArguments) {
                 path.expect("No path!"), 
                 extension.expect("No file format provided!"));
         }
-        ImageCommand::Quit => {
-            println!("QUITTING");
-        },
     }
 }
 

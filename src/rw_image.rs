@@ -3,14 +3,13 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 use std::ffi::OsStr;
 
-// use clap::builder::OsStr;
 use image::io::Reader;
 
 pub struct ImageDetails {
-    filepath: OsString, // complete filepath as given by user
-    basedir: OsString, // base directory
-    filename: OsString, // file name without extension
-    extension: OsString, // extension of the given file
+    pub filepath: OsString, // complete filepath
+    pub basedir: OsString, // base directory (root)
+    pub filename: OsString, // file name without extension
+    pub extension: OsString, // extension of the given file
 }
 
 impl ImageDetails {
@@ -19,13 +18,14 @@ impl ImageDetails {
         let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = Reader::open(&self.filepath)?
             .decode()?
             .into_rgb8();
+
         let width: u32 = rgb.width();
         let height: u32 = rgb.height();
+
         Ok((rgb, width, height))
     }
 
-    pub fn save_image(self, image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,filename_postfix: &str) -> Result<(), Box<dyn Error>>{
-
+    pub fn save_image(mut self, image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, filename_postfix: &str) -> Result<(), Box<dyn Error>>{
         let save_path: OsString = OsString::from(
             format!("{}\\{}_{}.{}", 
                 self.basedir.to_str().unwrap(),
@@ -33,8 +33,16 @@ impl ImageDetails {
                 filename_postfix,
                 self.extension.to_str().unwrap())
         );
-        println!("{}", save_path.to_str().unwrap());
+        // update the filepath field as this struct now represents the 'saved' image
+        self.filepath = save_path.clone();
+
+        println!("{}\n", self.filepath
+            .to_str()
+            .unwrap()
+        );
+        
         image_buf.save(save_path)?;
+
         Ok(())
     }
 
@@ -63,14 +71,3 @@ impl ImageDetails {
         }
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn it_works() {
-//         let result = add(2, 2);
-//         assert_eq!(result, 4);
-//     }
-// }

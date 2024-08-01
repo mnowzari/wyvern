@@ -5,8 +5,6 @@ const BLACKOUT_PX: image::Rgb<u8> = image::Rgb([0, 0, 0]);
 
 pub fn edge_detect(image_file: ImageDetails, threshold: f32, blackout: bool) {
     // main edge detection function
-    // let image_data = rw_image::load_image(&file_path)
-    //     .expect("Failed loading image!");
     let image_data: (image::ImageBuffer<image::Rgb<u8>,Vec<u8>>, u32, u32) = image_file.load_image().expect("Failure loading image!");
 
     let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;

@@ -1,28 +1,62 @@
-// use crate::image_resize;
 use std::fs;
 use std::path::PathBuf;
+use std::ffi::OsString;
+
 use glob::glob;
 
-pub fn batch_resize(directory: String, file_format: String) {
-    // main batch resize function
-    let pattern: String = format!("{}\\*.{}", directory, file_format);
-    println!("Searching {}", pattern);
+use crate::image_resize;
+use crate::rw_image::{self, ImageDetails};
 
-    // create new sub-directory to store resized images
-    let resized_images_base_dir: PathBuf = PathBuf::from(format!("{}\\{}", directory, "resized_images"));
-    if resized_images_base_dir.is_dir() {
-        let _ = fs::create_dir(resized_images_base_dir);
+pub fn batch_resize(directory: String, file_format: String) -> bool {
+    let subdir_name: String = String::from("resized_images");
+
+    // first, ensure the provided dir is valid
+    if !PathBuf::from(&directory).is_dir() {
+        println!("The provided path is not a valid directory!");
+        return false
     }
-
-    // glob through user-provided directory, resize each image we encounter and save it in our subdir
+    // create search pattern from the given directory and file format
+    let pattern: String = format!("{}\\*.{}", directory, file_format);
+    println!("Searching {}\n", pattern);
+    // glob through directory & resize each image we encounter and save it in our subdir
     for entry in glob(pattern.as_str()).expect("Failed to read directory path!") {
         match entry {
-            Ok(path) => {
-                println!("{}", path.to_str().unwrap());
-                // get_filename_from_path(path);
-                // image_resize(path, format!("{}\\{}", resized_images_base_dir, ))
+            Ok(image_path) => {
+                if check_or_create_subdir(&directory, &subdir_name) {
+                    let image_path_string: String = String::from(image_path
+                        .to_str()
+                        .unwrap());
+
+                    println!("{} => ", image_path_string);
+
+                    let mut img_det_t: ImageDetails = rw_image::ImageDetails::get_filename_and_format(
+                        &image_path_string);
+
+                    img_det_t.basedir = OsString::from(format!("{}\\{}", 
+                        img_det_t.basedir
+                            .to_str()
+                            .unwrap(),
+                        subdir_name));
+
+                    match image_resize::image_resize(img_det_t) {
+                        Ok(()) => {},
+                        Err(_x) => println!("An error occurred during image resizing!")
+                    };
+                }
             },
             Err(e) => println!("{:?}", e),
         }
     }
+    true
+}
+
+fn check_or_create_subdir(directory: &String, subdir_name: &String) -> bool {
+    let path_to_new_subdir: PathBuf = [directory, subdir_name].iter().collect();
+    if !path_to_new_subdir.is_dir() {
+        match fs::create_dir(path_to_new_subdir) {
+            Ok(_x) => return true,
+            Err(_x) => return false
+        }
+    }
+    true
 }
