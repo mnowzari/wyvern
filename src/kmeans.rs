@@ -1,3 +1,4 @@
+use std::error::Error;
 use rand::Rng;
 
 use crate::rw_image;
@@ -5,7 +6,7 @@ use crate::rw_image;
 const NUM_OF_POINTS: usize = 20;
 const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
 
-pub fn k_means_fast(image_file: rw_image::ImageDetails) {
+pub fn k_means_fast(image_file: rw_image::ImageDetails) -> Result<(), Box<dyn Error>> {
     let image_data: (image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32) = image_file.load_image()
         .expect("Failure loading image!");
 
@@ -58,6 +59,7 @@ pub fn k_means_fast(image_file: rw_image::ImageDetails) {
     for grid_color in grid_results {
         println!("R:{} G:{} B:{}", grid_color[0] as u8, grid_color[1] as u8, grid_color[2] as u8);
     }
+    Ok(())
 }
 
 fn generate_random_points_for_grid(image_buf: &image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,

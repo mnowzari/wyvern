@@ -3,7 +3,7 @@ use crate::rw_image::ImageDetails;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
-pub fn image_resize(image_file: ImageDetails) -> Result<(), Box<dyn Error>> {
+pub fn image_resize(image_file: &mut ImageDetails) -> Result<(), Box<dyn Error>> {
     // main resizing function
     let image_data: (image::ImageBuffer<image::Rgb<u8>,Vec<u8>>, u32, u32) = image_file.load_image().expect("Failure loading image!");
 

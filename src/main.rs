@@ -65,8 +65,8 @@ fn route_command(args: InputArguments) {
 
     match args.command {
         ImageCommand::EdgeDetect {path, threshold, blackout} => {
-            edge_detect::edge_detect(
-                rw_image::ImageDetails::get_filename_and_format(path
+            let _ = edge_detect::edge_detect(
+                &mut rw_image::new_image(path
                     .as_ref()
                     .expect("No path!")),
                 threshold,
@@ -74,20 +74,20 @@ fn route_command(args: InputArguments) {
         },
         ImageCommand::ImageResize {path} => {
             let _ = image_resize::image_resize(
-                rw_image::ImageDetails::get_filename_and_format(path
+                &mut rw_image::new_image(path
                     .as_ref()
                     .expect("No path!"))
             );
         },
         ImageCommand::Kmeans {path} => {
-            kmeans::k_means_fast(
-                rw_image::ImageDetails::get_filename_and_format(path
+            let _ = kmeans::k_means_fast(
+                rw_image::new_image(path
                     .as_ref()
                     .expect("No path!"))
             );
         },
         ImageCommand::BatchResize {path, extension} => {
-            batch_resize::batch_resize(
+            let _ = batch_resize::batch_resize(
                 path.expect("No path!"), 
                 extension.expect("No file format provided!"));
         }

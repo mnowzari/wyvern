@@ -1,9 +1,10 @@
+use std::error::Error;
 use crate::rw_image::ImageDetails;
 
 const GREEN_HIGHLIGHT_PX: image::Rgb<u8> = image::Rgb([0, 255, 0]);
 const BLACKOUT_PX: image::Rgb<u8> = image::Rgb([0, 0, 0]);
 
-pub fn edge_detect(image_file: ImageDetails, threshold: f32, blackout: bool) {
+pub fn edge_detect(image_file: &mut ImageDetails, threshold: f32, blackout: bool) -> Result<(), Box<dyn Error>> {
     // main edge detection function
     let image_data: (image::ImageBuffer<image::Rgb<u8>,Vec<u8>>, u32, u32) = image_file.load_image().expect("Failure loading image!");
 
@@ -55,6 +56,7 @@ pub fn edge_detect(image_file: ImageDetails, threshold: f32, blackout: bool) {
         i += 2;
     }
     let _ = image_file.save_image(image_buf, &"edges");
+    Ok(())
 }
 
 fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {

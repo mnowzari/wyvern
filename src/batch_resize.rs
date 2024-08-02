@@ -1,19 +1,19 @@
 use std::fs;
 use std::path::PathBuf;
 use std::ffi::OsString;
+use std::error::Error;
 
 use glob::glob;
 
 use crate::image_resize;
 use crate::rw_image::{self, ImageDetails};
 
-pub fn batch_resize(directory: String, file_format: String) -> bool {
+pub fn batch_resize(directory: String, file_format: String) -> Result<(), Box<dyn Error>> {
     let subdir_name: String = String::from("resized_images");
 
     // first, ensure the provided dir is valid
     if !PathBuf::from(&directory).is_dir() {
-        println!("The provided path is not a valid directory!");
-        return false
+        panic!("The provided path is not a valid directory!");
     }
     // create search pattern from the given directory and file format
     let pattern: String = format!("{}\\*.{}", directory, file_format);
@@ -29,7 +29,7 @@ pub fn batch_resize(directory: String, file_format: String) -> bool {
 
                     println!("{} => ", image_path_string);
 
-                    let mut img_det_t: ImageDetails = rw_image::ImageDetails::get_filename_and_format(
+                    let mut img_det_t: ImageDetails = rw_image::new_image(
                         &image_path_string);
 
                     img_det_t.basedir = OsString::from(format!("{}\\{}", 
@@ -38,7 +38,7 @@ pub fn batch_resize(directory: String, file_format: String) -> bool {
                             .unwrap(),
                         subdir_name));
 
-                    match image_resize::image_resize(img_det_t) {
+                    match image_resize::image_resize(&mut img_det_t) {
                         Ok(()) => {},
                         Err(_x) => println!("An error occurred during image resizing!")
                     };
@@ -47,7 +47,7 @@ pub fn batch_resize(directory: String, file_format: String) -> bool {
             Err(e) => println!("{:?}", e),
         }
     }
-    true
+    Ok(())
 }
 
 fn check_or_create_subdir(directory: &String, subdir_name: &String) -> bool {
