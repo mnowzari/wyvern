@@ -62,8 +62,12 @@ pub fn k_means_fast(image_file: rw_image::ImageDetails) -> Result<(), Box<dyn Er
     Ok(())
 }
 
-fn generate_random_points_for_grid(image_buf: &image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
-        k: u32, i: u32, grid_dim_width: u32, grid_dim_height: u32) -> [[f32; 3]; NUM_OF_POINTS] {
+fn generate_random_points_for_grid(
+        image_buf: &image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
+        k: u32,
+        i: u32,
+        grid_dim_width: u32,
+        grid_dim_height: u32) -> [[f32; 3]; NUM_OF_POINTS] {
 
     let mut k_points: [[f32; 3]; NUM_OF_POINTS] = [[0.0; 3]; NUM_OF_POINTS];
 
@@ -83,4 +87,38 @@ fn calc_distance(r1: &f32, g1: &f32, b1: &f32, r2: &f32, g2: &f32, b2: &f32) -> 
         f32::powf(r1-r2, 2.0) + 
         f32::powf(g1-g2, 2.0) + 
         f32::powf(b1-b2, 2.0))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_calc_distance() {
+        let expected: [f32; 5] = [
+            173.20508,
+            5.0990195,
+            0.0,
+            118.54113,
+            80.80842];
+
+        let test_points: [[f32; 6]; 5] = [
+            [0.0, 0.0, 0.0, 100.0, 100.0, 100.0],
+            [10.0, 15.0, 13.0, 14.0, 14.0, 10.0],
+            [33.0, 45.0, 67.0, 33.0, 45.0, 67.0],
+            [101.0, -34.0, 59.0, -9.0, -78.0, 55.0],
+            [55.0, 3.0, 1.0, 88.0, 74.0, 21.0]];
+
+        for idx in 0..5 {
+            let res: f32 = calc_distance(
+                &test_points[idx][0],
+                &test_points[idx][1],
+                &test_points[idx][2],
+                &test_points[idx][3],
+                &test_points[idx][4],
+                &test_points[idx][5]);
+            
+            assert_eq!(expected[idx], res);
+        }
+    }
 }

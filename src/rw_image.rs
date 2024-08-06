@@ -104,9 +104,6 @@ mod tests {
             format!("{}\\temp\\fakeimage.png", cwd.display().to_string())
         );
 
-        println!("{}", temp_dir.display().to_string());
-        println!("{}", temp_image_path.display().to_string());
-
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {
                 let image_details_instance: ImageDetails = new_image(
@@ -131,15 +128,5 @@ mod tests {
         }
         // cleanup temp dir
         let _ = fs::remove_dir(temp_dir);
-    }
-
-    #[test]
-    fn test_save_image() {
-
-    }
-
-    #[test]
-    fn test_load_image() {
-
     }
 }

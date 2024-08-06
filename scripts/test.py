@@ -19,7 +19,8 @@ def execute_tests() -> bool:
 
     try:
         command_to_run = "cargo test"
-        sbpc.check_output(command_to_run, shell=True)
+        output = sbpc.check_output(command_to_run, shell=True).decode("utf-8")
+        print (f"{output}")
     except Exception as e:
         print (f"Except {e} has occurred during the execution of {command_to_run}")
         return False

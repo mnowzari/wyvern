@@ -67,11 +67,53 @@ fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {
     )
 }
 
-fn compute_std_dev(mean: f32, px_top_right: f32, px_top_left: f32, px_bottom_left: f32, px_bottom_right: f32, width: u32, height: u32) -> f32 {
+fn compute_std_dev(mean: f32, px_top_right: f32, px_top_left: f32, px_bottom_left: f32,
+    px_bottom_right: f32, width: u32, height: u32) -> f32 {
     f32::sqrt(
         f32::powf(px_top_right-mean, 2.0) + 
         f32::powf(px_top_left-mean, 2.0) + 
         f32::powf(px_bottom_left-mean, 2.0) + 
         f32::powf(px_bottom_right-mean, 2.0) / (width as f32 * height as f32)
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compute_rgb_distance() {
+        let expected: [f32; 5] = [
+            0.0,
+            22.22611,
+            87.19518,
+            121.81133,
+            55.090836];
+
+        let test_points: [image::Rgb<u8>; 5] = [
+            image::Rgb([0, 0, 0]),
+            image::Rgb([10, 15, 13]),
+            image::Rgb([33, 45, 67]),
+            image::Rgb([101, 34, 59]),
+            image::Rgb([55, 3, 1])];
+
+        for idx in 0..5 {
+            let res: f32 = compute_rgb_distance(&test_points[idx]);
+            assert_eq!(expected[idx], res);
+        }
+    }
+
+    #[test]
+    fn test_compute_std_dev() {
+        let res: f32 = compute_std_dev(
+            35.5324,
+            44.4,
+            57.6,
+            33.2,
+            19.1,
+            1920,
+            1080);
+
+        assert_eq!(23.896727, res);
+    }
 }
