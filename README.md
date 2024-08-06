@@ -1,5 +1,4 @@
 # wyvern
-=============
 A command-line image processing tool written in Rust.
 
 This tool has been tested with .png and .jpg files. Support for other formats has not been verified yet!
