@@ -18,11 +18,12 @@ def execute_tests() -> bool:
     print("----\nExecuting cargo tests\n----")
 
     try:
-        command_to_run = "cargo test"
-        output = sbpc.check_output(command_to_run, shell=True).decode("utf-8")
+        cmd = "cargo test --no-fail-fast"
+        print (f"{cmd}")
+        output = sbpc.check_output(cmd, shell=True).decode("utf-8")
         print (f"{output}")
     except Exception as e:
-        print (f"Except {e} has occurred during the execution of {command_to_run}")
+        print (f"Except {e} has occurred during the execution of {cmd}")
         return False
     return True
 
