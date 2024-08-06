@@ -1,8 +1,6 @@
 '''
 Script to execute cargo tests
-and perform teardown post-testing bc
-Rust does not offer a straightforward way
-to teardown if a test fails
+and build a release
 
 This script is intended to be executed
 from INSIDE the ../scripts directory!
@@ -14,6 +12,28 @@ import glob
 from pathlib import Path
 import subprocess as sbpc
 
+def err_msg(e: Exception, cmd: str):
+    print (f"\nException {e} has occurred during the execution of {cmd}\n")
+
+def teardown() -> bool:
+    print("----\nExecuting teardown\n----")
+
+    parent_path = Path(os.getcwd()).parent.absolute()
+    search_pattern = f"{parent_path}\\temp"
+
+    print (f"Searching {parent_path} for {search_pattern}\n")
+
+    try:
+
+        for f in glob.glob(search_pattern):
+            print (f"Found and removing {f}")
+            os.removedirs(f)
+
+    except Exception as e:
+        err_msg(e, "teardown")
+        return False
+    return True
+
 def execute_tests() -> bool:
     print("----\nExecuting cargo tests\n----")
 
@@ -22,28 +42,26 @@ def execute_tests() -> bool:
         print (f"{cmd}")
         output = sbpc.check_output(cmd, shell=True).decode("utf-8")
         print (f"{output}")
+
+        teardown()
     except Exception as e:
-        print (f"Except {e} has occurred during the execution of {cmd}")
+        err_msg(e, cmd)
         return False
     return True
 
-def teardown() -> bool:
-    print("----\nPerforming teardown\n----")
-
-    parent_path = Path(os.getcwd()).parent.absolute()
-    search_pattern = f"{parent_path}\\temp"
-
-    print (f"Searching {parent_path} for {search_pattern}")
-
+def rustfmt() -> bool:
+    print("----\nExecuting rustfmt\n----")
     try:
-        for f in glob.glob(search_pattern):
-            print (f"Found and removing {f}")
-            os.removedirs(f)
+        parent_path = Path(os.getcwd()).parent.absolute()
+
+        cmd = f"rustfmt --verbose {parent_path}\\src\\main.rs"
+        print (f"{cmd}")
+        output = sbpc.check_output(cmd, shell=True).decode("utf-8")
+        print (f"{output}")
     except Exception as e:
-        print (f"Exception {e} has occurred during teardown!")
-        return False
-    return True
+        err_msg(e, cmd)
+
 
 if __name__ == "__main__":
+    rustfmt()
     execute_tests()
-    teardown()

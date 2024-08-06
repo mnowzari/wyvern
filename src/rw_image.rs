@@ -1,23 +1,23 @@
 use std::error::Error;
+use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::path::PathBuf;
-use std::ffi::OsStr;
 
 use image::io::Reader;
 
 pub struct ImageDetails {
-    pub filepath: OsString, // complete filepath
-    pub basedir: OsString, // base directory (root)
-    pub filename: OsString, // file name without extension
+    pub filepath: OsString,  // complete filepath
+    pub basedir: OsString,   // base directory (root)
+    pub filename: OsString,  // file name without extension
     pub extension: OsString, // extension of the given file
 }
 
 impl ImageDetails {
-
-    pub fn load_image(&self) -> Result<(image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32), Box<dyn Error>> {
-        let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = Reader::open(&self.filepath)?
-            .decode()?
-            .into_rgb8();
+    pub fn load_image(
+        &self,
+    ) -> Result<(image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32), Box<dyn Error>> {
+        let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+            Reader::open(&self.filepath)?.decode()?.into_rgb8();
 
         let width: u32 = rgb.width();
         let height: u32 = rgb.height();
@@ -25,27 +25,27 @@ impl ImageDetails {
         Ok((rgb, width, height))
     }
 
-    pub fn save_image(&mut self, image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
-        filename_postfix: &str) -> Result<(), Box<dyn Error>>{
-
-        let save_path: OsString = OsString::from(
-            format!("{}\\{}_{}.{}", 
-                self.basedir.to_str().unwrap(),
-                self.filename.to_str().unwrap(),
-                filename_postfix,
-                self.extension.to_str().unwrap())
-        );
+    pub fn save_image(
+        &mut self,
+        image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
+        filename_postfix: &str,
+    ) -> Result<bool, Box<dyn Error>> {
+        let save_path: OsString = OsString::from(format!(
+            "{}\\{}_{}.{}",
+            self.basedir.to_str().unwrap(),
+            self.filename.to_str().unwrap(),
+            filename_postfix,
+            self.extension.to_str().unwrap()
+        ));
         // update the filepath field as this struct now represents the 'saved' image
         self.filepath = save_path.clone();
 
-        println!("{}\n", self.filepath
-            .to_str()
-            .unwrap()
-        );
-        
-        image_buf.save(save_path)?;
+        println!("{}\n", self.filepath.to_str().unwrap());
 
-        Ok(())
+        match image_buf.save(save_path) {
+            Ok(_) => Ok(true),
+            Err(_) => panic!("An issue occurred during the saving of the image buffer!"),
+        }
     }
 }
 
@@ -55,10 +55,7 @@ pub fn new_image(file_path: &String) -> ImageDetails {
         panic!("Could not parse the provided directory! Parent dir is not valid.")
     }
 
-    let base_dir: &OsStr = path
-        .parent()
-        .unwrap()
-        .as_os_str();
+    let base_dir: &OsStr = path.parent().unwrap().as_os_str();
 
     let file_ext: &OsStr = match path.extension() {
         Some(x) => x,
@@ -80,15 +77,14 @@ pub fn new_image(file_path: &String) -> ImageDetails {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, env};
+    use std::{env, fs};
 
     use super::*;
 
     #[test]
     #[should_panic]
     fn test_new_image_bad_path() {
-        let _: ImageDetails = new_image(
-            &String::from("a\\bad\\path\\"));
+        let _: ImageDetails = new_image(&String::from("a\\bad\\path\\"));
     }
 
     #[test]
@@ -96,32 +92,35 @@ mod tests {
         // create temp dir, as the parent dir must exist
         let cwd: PathBuf = env::current_dir().unwrap().clone();
 
-        let temp_dir: PathBuf = PathBuf::from(
-            format!("{}\\temp\\", cwd.display().to_string())
-        );
-    
-        let temp_image_path: PathBuf = PathBuf::from(
-            format!("{}\\temp\\fakeimage.png", cwd.display().to_string())
-        );
+        let temp_dir: PathBuf = PathBuf::from(format!("{}\\temp\\", cwd.display().to_string()));
+
+        let temp_image_path: PathBuf = PathBuf::from(format!(
+            "{}\\temp\\fakeimage.png",
+            cwd.display().to_string()
+        ));
 
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {
-                let image_details_instance: ImageDetails = new_image(
-                    &String::from(temp_image_path.display().to_string()));
+                let image_details_instance: ImageDetails =
+                    new_image(&String::from(temp_image_path.display().to_string()));
 
-                assert_eq!(image_details_instance.filepath,
+                assert_eq!(
+                    image_details_instance.filepath,
                     OsString::from(temp_image_path.display().to_string())
                 );
-                assert_eq!(image_details_instance.basedir,
+                assert_eq!(
+                    image_details_instance.basedir,
                     OsString::from(temp_image_path.parent().unwrap())
                 );
-                assert_eq!(image_details_instance.filename,
+                assert_eq!(
+                    image_details_instance.filename,
                     OsString::from(temp_image_path.file_stem().unwrap())
                 );
-                assert_eq!(image_details_instance.extension,
+                assert_eq!(
+                    image_details_instance.extension,
                     OsString::from(temp_image_path.extension().unwrap())
                 );
-            },
+            }
             Err(x) => {
                 panic!("\n----\ntest_new_image_valid_path => Problem creating temp dir!\n{x}\n----")
             }
