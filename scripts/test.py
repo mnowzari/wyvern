@@ -12,10 +12,17 @@ import glob
 from pathlib import Path
 import subprocess as sbpc
 
-def err_msg(e: Exception, cmd: str):
-    print (f"\nException {e} has occurred during the execution of {cmd}\n")
+def err_msg(excp: Exception, cmd: str):
+    '''
+    helper func to print error messages
+    '''
+    print (f"\nException {excp} has occurred during the execution of {cmd}\n")
 
 def teardown() -> bool:
+    '''
+    perform any necessary teardown of files/folders created
+    during test runs
+    '''
     print("----\nExecuting teardown\n----")
 
     parent_path = Path(os.getcwd()).parent.absolute()
@@ -25,16 +32,19 @@ def teardown() -> bool:
 
     try:
 
-        for f in glob.glob(search_pattern):
-            print (f"Found and removing {f}")
-            os.removedirs(f)
+        for folder in glob.glob(search_pattern):
+            print (f"Found and removing {folder}")
+            os.removedirs(folder)
 
-    except Exception as e:
-        err_msg(e, "teardown")
+    except OSError as excp:
+        err_msg(excp, "teardown")
         return False
     return True
 
 def execute_tests() -> bool:
+    '''
+    run cargo test
+    '''
     print("----\nExecuting cargo tests\n----")
 
     try:
@@ -44,12 +54,15 @@ def execute_tests() -> bool:
         print (f"{output}")
 
         teardown()
-    except Exception as e:
-        err_msg(e, cmd)
+    except sbpc.CalledProcessError as excp:
+        err_msg(excp, cmd)
         return False
     return True
 
 def rustfmt() -> bool:
+    '''
+    run rustfmt
+    '''
     print("----\nExecuting rustfmt\n----")
     try:
         parent_path = Path(os.getcwd()).parent.absolute()
@@ -58,9 +71,8 @@ def rustfmt() -> bool:
         print (f"{cmd}")
         output = sbpc.check_output(cmd, shell=True).decode("utf-8")
         print (f"{output}")
-    except Exception as e:
-        err_msg(e, cmd)
-
+    except sbpc.CalledProcessError as excp:
+        err_msg(excp, cmd)
 
 if __name__ == "__main__":
     rustfmt()

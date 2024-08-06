@@ -5,6 +5,7 @@ use crate::rw_image;
 
 const NUM_OF_POINTS: usize = 20;
 const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
+const DISTANCE: f32 = 10.0;
 
 pub fn k_means_fast(image_file: rw_image::ImageDetails) -> Result<(), Box<dyn Error>> {
     let image_data: (image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32) =
@@ -40,7 +41,7 @@ pub fn k_means_fast(image_file: rw_image::ImageDetails) -> Result<(), Box<dyn Er
                     &sample_pixels[s_idx][2],
                 );
 
-                if distance < 10.0 {
+                if distance < DISTANCE {
                     target_point[0] += sample_pixels[s_idx][0];
                     target_point[1] += sample_pixels[s_idx][1];
                     target_point[2] += sample_pixels[s_idx][2];
