@@ -1,7 +1,8 @@
-use std::error::Error;
-use std::ffi::OsStr;
-use std::ffi::OsString;
-use std::path::PathBuf;
+use std::{
+    error::Error,
+    ffi::{OsStr, OsString},
+    path::PathBuf,
+};
 
 use image::io::Reader;
 
@@ -47,31 +48,31 @@ impl ImageDetails {
             Err(_) => panic!("An issue occurred during the saving of the image buffer!"),
         }
     }
-}
 
-pub fn new_image(file_path: &String) -> ImageDetails {
-    let path: PathBuf = PathBuf::from(file_path);
-    if !path.parent().unwrap().is_dir() {
-        panic!("Could not parse the provided directory! Parent dir is not valid.")
-    }
+    pub fn new_image(file_path: &String) -> ImageDetails {
+        let path: PathBuf = PathBuf::from(file_path);
+        if !path.parent().unwrap().is_dir() {
+            panic!("Could not parse the provided directory! Parent dir is not valid.")
+        }
 
-    let base_dir: &OsStr = path.parent().unwrap().as_os_str();
+        let base_dir: &OsStr = path.parent().unwrap().as_os_str();
 
-    let file_ext: &OsStr = match path.extension() {
-        Some(x) => x,
-        None => &OsStr::new(""),
-    };
+        let file_ext: &OsStr = match path.extension() {
+            Some(x) => x,
+            None => &OsStr::new(""),
+        };
 
-    let file_name: &OsStr = match path.file_stem() {
-        Some(x) => x,
-        None => &OsStr::new(""),
-    };
+        let file_name: &OsStr = match path.file_stem() {
+            Some(x) => x,
+            None => &OsStr::new(""),
+        };
 
-    ImageDetails {
-        filepath: path.as_os_str().to_os_string(),
-        basedir: base_dir.to_os_string(),
-        filename: file_name.to_os_string(),
-        extension: file_ext.to_os_string(),
+        ImageDetails {
+            filepath: path.as_os_str().to_os_string(),
+            basedir: base_dir.to_os_string(),
+            filename: file_name.to_os_string(),
+            extension: file_ext.to_os_string(),
+        }
     }
 }
 
@@ -84,7 +85,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_new_image_bad_path() {
-        let _: ImageDetails = new_image(&String::from("a\\bad\\path\\"));
+        let _: ImageDetails = ImageDetails::new_image(&String::from("a\\bad\\path\\"));
     }
 
     #[test]
@@ -102,7 +103,7 @@ mod tests {
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {
                 let image_details_instance: ImageDetails =
-                    new_image(&String::from(temp_image_path.display().to_string()));
+                    ImageDetails::new_image(&String::from(temp_image_path.display().to_string()));
 
                 assert_eq!(
                     image_details_instance.filepath,

@@ -1,3 +1,4 @@
+#[allow(dead_code, unused)]
 use clap::{Parser, Subcommand};
 
 mod batch_resize;
@@ -5,6 +6,7 @@ mod edge_detect;
 mod image_resize;
 mod kmeans;
 mod rw_image;
+mod threadpool;
 
 #[derive(Parser)]
 #[command(
@@ -62,18 +64,20 @@ fn route_command(args: InputArguments) {
             blackout,
         } => {
             let _ = edge_detect::edge_detect(
-                &mut rw_image::new_image(path.as_ref().expect("No path!")),
+                &mut rw_image::ImageDetails::new_image(path.as_ref().expect("No path!")),
                 threshold,
                 blackout,
             );
         }
         ImageCommand::ImageResize { path } => {
-            let _ = image_resize::image_resize(&mut rw_image::new_image(
+            let _ = image_resize::image_resize(&mut rw_image::ImageDetails::new_image(
                 path.as_ref().expect("No path!"),
             ));
         }
         ImageCommand::Kmeans { path } => {
-            let _ = kmeans::k_means_fast(rw_image::new_image(path.as_ref().expect("No path!")));
+            let _ = kmeans::k_means_fast(rw_image::ImageDetails::new_image(
+                path.as_ref().expect("No path!"),
+            ));
         }
         ImageCommand::BatchResize { path, extension } => {
             let _ = batch_resize::batch_resize(
