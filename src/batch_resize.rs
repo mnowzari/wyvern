@@ -65,3 +65,46 @@ fn check_or_create_subdir(directory: &String, subdir_name: &String) -> bool {
     }
     true
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{env, fs};
+
+    use super::*;
+
+    #[test]
+    fn test_check_or_create_subdir_subdir_exists() {
+        let cwd: PathBuf = env::current_dir().unwrap().clone();
+
+        let temp_dir: PathBuf = PathBuf::from(format!(
+            "{}\\temp_check_or_create\\",
+            cwd.display().to_string()
+        ));
+
+        match fs::create_dir(&temp_dir) {
+            Ok(_x) => {
+                let res = check_or_create_subdir(
+                    &cwd.display().to_string(),
+                    &temp_dir.display().to_string(),
+                );
+                assert_eq!(true, res);
+
+                // remote temp dir
+                let _ = fs::remove_dir(&temp_dir);
+                // check again now that the dir doesn't exist
+                let res_two: bool = check_or_create_subdir(
+                    &cwd.display().to_string(),
+                    &temp_dir.display().to_string(),
+                );
+                assert_eq!(true, res_two);
+            }
+            Err(x) => {
+                panic!(
+                    "\n----\ntest_check_or_create_subdir_subdir_exists => Problem creating temp dir!\n{x}\n----"
+                )
+            }
+        }
+        // cleanup temp dir
+        let _ = fs::remove_dir(&temp_dir);
+    }
+}

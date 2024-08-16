@@ -3,14 +3,14 @@ use std::error::Error;
 
 const DOWNSCALE_FACTOR: u32 = 2;
 
-pub fn image_resize(image_file: &mut ImageDetails) -> Result<bool, Box<dyn Error>> {
+pub fn image_resize(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>> {
     // main resizing function
-    let image_data: (image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32) =
-        image_file.load_image().expect("Failure loading image!");
+    let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+        image_details.load_image().expect("Failure loading image!");
 
-    let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;
-    let width: u32 = image_data.1;
-    let height: u32 = image_data.2;
+    let width: u32 = image_details.width;
+    let height: u32 = image_details.height;
+
     let mut output_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
         image::ImageBuffer::new(width / DOWNSCALE_FACTOR, height / DOWNSCALE_FACTOR);
 
@@ -32,7 +32,7 @@ pub fn image_resize(image_file: &mut ImageDetails) -> Result<bool, Box<dyn Error
         i += 2;
     }
 
-    Ok(image_file.save_image(output_buf, &"minimized")?)
+    Ok(image_details.save_image(output_buf, &"minimized")?)
 }
 
 fn average_pixel_values(

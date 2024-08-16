@@ -5,17 +5,16 @@ const GREEN_HIGHLIGHT_PX: image::Rgb<u8> = image::Rgb([0, 255, 0]);
 const BLACKOUT_PX: image::Rgb<u8> = image::Rgb([0, 0, 0]);
 
 pub fn edge_detect(
-    image_file: &mut ImageDetails,
+    image_details: &mut ImageDetails,
     threshold: f32,
     blackout: bool,
 ) -> Result<bool, Box<dyn Error>> {
     // main edge detection function
-    let image_data: (image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32) =
-        image_file.load_image().expect("Failure loading image!");
+    let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+        image_details.load_image().expect("Failure loading image!");
 
-    let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = image_data.0;
-    let width: u32 = image_data.1;
-    let height: u32 = image_data.2;
+    let width: u32 = image_details.width;
+    let height: u32 = image_details.height;
 
     let mut i: u32 = 1;
     while i < width - 1 {
@@ -38,7 +37,7 @@ pub fn edge_detect(
                 width,
                 height,
             );
-            // compare the resultant distance to the threshold const
+            // compare the resultant distance to the threshold
             if std_dev > threshold {
                 image_buf.put_pixel(i - 1, k, GREEN_HIGHLIGHT_PX);
                 image_buf.put_pixel(i - 1, k - 1, GREEN_HIGHLIGHT_PX);
@@ -56,7 +55,7 @@ pub fn edge_detect(
         i += 2;
     }
 
-    Ok(image_file.save_image(image_buf, &"edges")?)
+    Ok(image_details.save_image(image_buf, &"edges")?)
 }
 
 fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {

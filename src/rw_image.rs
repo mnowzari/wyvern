@@ -11,19 +11,21 @@ pub struct ImageDetails {
     pub basedir: OsString,   // base directory (root)
     pub filename: OsString,  // file name without extension
     pub extension: OsString, // extension of the given file
+    pub width: u32,
+    pub height: u32,
 }
 
 impl ImageDetails {
     pub fn load_image(
-        &self,
-    ) -> Result<(image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, u32, u32), Box<dyn Error>> {
+        &mut self,
+    ) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, Box<dyn Error>> {
         let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
             Reader::open(&self.filepath)?.decode()?.into_rgb8();
 
-        let width: u32 = rgb.width();
-        let height: u32 = rgb.height();
+        self.width = rgb.width();
+        self.height = rgb.height();
 
-        Ok((rgb, width, height))
+        Ok(rgb)
     }
 
     pub fn save_image(
@@ -72,6 +74,8 @@ impl ImageDetails {
             basedir: base_dir.to_os_string(),
             filename: file_name.to_os_string(),
             extension: file_ext.to_os_string(),
+            width: 0,
+            height: 0,
         }
     }
 }

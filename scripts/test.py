@@ -26,7 +26,7 @@ def teardown() -> bool:
     print("----\nExecuting teardown\n----")
 
     parent_path = Path(os.getcwd()).parent.absolute()
-    search_pattern = f"{parent_path}\\temp"
+    search_pattern = f"{parent_path}\\temp*"
 
     print (f"Searching {parent_path} for {search_pattern}\n")
 
@@ -52,8 +52,6 @@ def execute_tests() -> bool:
         print (f"{cmd}")
         output = sbpc.check_output(cmd, shell=True).decode("utf-8")
         print (f"{output}")
-
-        teardown()
     except sbpc.CalledProcessError as excp:
         err_msg(excp, cmd)
         return False
@@ -77,3 +75,4 @@ def rustfmt() -> bool:
 if __name__ == "__main__":
     rustfmt()
     execute_tests()
+    teardown()
