@@ -5,6 +5,7 @@ mod batch_resize;
 mod edge_detect;
 mod image_resize;
 mod kmeans;
+mod pixelsort;
 mod rw_image;
 mod threadpool;
 
@@ -54,6 +55,11 @@ enum ImageCommand {
         #[arg(required = true, help = "File format to filter by for batch resizing.")]
         extension: Option<String>,
     },
+
+    PixelSort {
+        #[arg(required = true)]
+        path: Option<String>,
+    },
 }
 
 fn route_command(args: InputArguments) {
@@ -84,6 +90,11 @@ fn route_command(args: InputArguments) {
                 path.expect("No path!"),
                 extension.expect("No file format provided!"),
             );
+        }
+        ImageCommand::PixelSort { path } => {
+            let _ = pixelsort::pixel_sort(rw_image::ImageDetails::new_image(
+                path.as_ref().expect("No path!"),
+            ));
         }
     }
 }
