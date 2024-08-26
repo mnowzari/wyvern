@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::error::Error;
 
-use crate::rw_image;
+use crate::{rw_image, utils};
 
 const NUM_OF_POINTS: usize = 16;
 const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
@@ -36,7 +36,7 @@ pub fn k_means_fast(mut image_details: rw_image::ImageDetails) -> Result<(), Box
             let mut counter: u8 = 1;
 
             for s_idx in 1..sample_pixels.len() {
-                let distance: f32 = calc_distance(
+                let distance: f32 = utils::calc_distance(
                     &target_point[0],
                     &target_point[1],
                     &target_point[2],
@@ -91,39 +91,4 @@ fn generate_random_points_for_grid(
         k_points[k_idx] = [temp_px[0] as f32, temp_px[1] as f32, temp_px[2] as f32];
     }
     k_points
-}
-
-fn calc_distance(r1: &f32, g1: &f32, b1: &f32, r2: &f32, g2: &f32, b2: &f32) -> f32 {
-    f32::sqrt(f32::powf(r1 - r2, 2.0) + f32::powf(g1 - g2, 2.0) + f32::powf(b1 - b2, 2.0))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_calc_distance() {
-        let expected: [f32; 5] = [173.20508, 5.0990195, 0.0, 118.54113, 80.80842];
-
-        let test_points: [[f32; 6]; 5] = [
-            [0.0, 0.0, 0.0, 100.0, 100.0, 100.0],
-            [10.0, 15.0, 13.0, 14.0, 14.0, 10.0],
-            [33.0, 45.0, 67.0, 33.0, 45.0, 67.0],
-            [101.0, -34.0, 59.0, -9.0, -78.0, 55.0],
-            [55.0, 3.0, 1.0, 88.0, 74.0, 21.0],
-        ];
-
-        for idx in 0..5 {
-            let res: f32 = calc_distance(
-                &test_points[idx][0],
-                &test_points[idx][1],
-                &test_points[idx][2],
-                &test_points[idx][3],
-                &test_points[idx][4],
-                &test_points[idx][5],
-            );
-
-            assert_eq!(expected[idx], res);
-        }
-    }
 }

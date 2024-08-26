@@ -1,82 +1,58 @@
-use image::io::Reader;
 use rand::Rng;
-use std::env;
 use std::error::Error;
 
-use crate::rw_image;
+use crate::{cli::PixelSortDir, rw_image, utils};
 
-pub fn pixel_sort(mut image_details: rw_image::ImageDetails) -> Result<(), Box<dyn Error>> {
+pub fn pixel_sort(
+    mut image_details: rw_image::ImageDetails,
+    threshold: f32,
+    direction: PixelSortDir,
+) -> Result<bool, Box<dyn Error>> {
     let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
     let width = image_details.width;
     let height = image_details.height;
 
-    for row in 0..width {
-        for col in 0..height {
-            image_buf.get_pixel(row, col);
+    let random_x_coord: u32 = rand::thread_rng().gen_range(2..width);
+    let random_y_coord: u32 = rand::thread_rng().gen_range(2..height);
+    // clone this pixel as we will need it later
+    let comparison_px: image::Rgb<u8> = image_buf.get_pixel(random_x_coord, random_y_coord).clone();
+
+    for row in 1..width {
+        for col in 1..height {
+            let px: image::Rgb<u8> = image_buf.get_pixel(row, col).clone();
+
+            // calculate distance
+            let distance = utils::calc_distance(
+                &f32::from(px[0]),
+                &f32::from(px[1]),
+                &f32::from(px[2]),
+                &f32::from(comparison_px[0]),
+                &f32::from(comparison_px[1]),
+                &f32::from(comparison_px[2]),
+            );
+
+            // check distance and swap elements if under threshold
+            // if it is, swap the pixels around
+            if distance < threshold {
+                let mut row_n: u32 = row;
+                let mut col_n: u32 = col;
+                match direction {
+                    PixelSortDir::Horizontal => {
+                        row_n -= 1;
+                    }
+                    PixelSortDir::Vertical => {
+                        col_n -= 1;
+                    }
+                    PixelSortDir::Diagonal => {
+                        row_n -= 1;
+                        col_n -= 1
+                    }
+                }
+                image_buf.put_pixel(row, col, image_buf.get_pixel(row_n, col_n).clone());
+            }
         }
     }
-    Ok(())
+    Ok(image_details.save_image(image_buf, &"pixelsorted")?)
 }
-
-// fn basic_pixel_sort(mut linear: Vec<Vec3<f32>>) -> Vec<Vec3<f32>> {
-//     let random_pixel_idx = rand::thread_rng().gen_range(2..=linear.len()-1);
-//     println!("{random_pixel_idx}");
-//     for idx in 1..linear.len() {
-//         let r = linear[idx][0];
-//         let g = linear[idx][1];
-//         let b = linear[idx][2];
-
-//         let x = linear[random_pixel_idx][0];
-//         let y = linear[random_pixel_idx][1];
-//         let z = linear[random_pixel_idx][2];
-//         // calculate distance
-//         let distance = f32::sqrt( f32::powf(r-x, 2.0) + f32::powf(g-y, 2.0) + f32::powf(b-z, 2.0) );
-//         // check distance and swap elements as needed
-//         if distance < 70.0 {
-//             linear[idx] = linear[idx-1]
-//         }
-//     }
-//     return linear
-// }
-
-// fn main() -> Result<(), Box<dyn Error>> {
-//     println!("<<<< RUST Image Manipulator >>>>");
-//     // Get arguments
-//     let args: Vec<String> = env::args().collect();
-
-//     let file_path = &args[1];
-//     println!("{file_path}");
-
-//     let img = Reader::open(file_path)?.decode()?;
-
-//     let mut rgb = img.into_rgb8();
-//     let mut linear = vec![Vec3::<f32>::zero(); rgb.as_raw().len()];
-
-//     // let width = rgb.width();
-//     // let height = rgb.height();
-
-//     // zip the pixels into the linear buffer we created above
-//     rgb.pixels()
-//         .zip(linear.iter_mut())
-//         .for_each(|(rgb, linear)| {
-//             let rgbvec = Vec3::<u8>::from(rgb.0);
-//             // *linear = rgbvec.numcast::<f32>().unwrap().map(|x| x / 255.0);
-//             *linear = rgbvec.numcast::<f32>().unwrap();
-//         });
-
-//     let modified = basic_pixel_sort(linear);
-//     // zip the output back into the img rgb
-//     modified
-//         .into_iter()
-//             .zip(rgb.pixels_mut())
-//             .for_each(|(linear, rgb)| {
-//                 // let transformed = (linear * 255.0).clamped(0.0, 255.0);
-//                 rgb.0 = linear.numcast().unwrap().into_array();
-//             });
-
-//     println!("./{file_path}_modified.png");
-//     rgb.save(format!("{file_path}_modified.png"))?;
-//     Ok(())
-// }

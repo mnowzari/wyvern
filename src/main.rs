@@ -1,70 +1,20 @@
-#[allow(dead_code, unused)]
-use clap::{Parser, Subcommand};
+use clap::Parser;
 
-mod batch_resize;
+#[allow(dead_code, unused)]
+mod cli;
+mod denoise;
 mod edge_detect;
-mod image_resize;
+mod image_downscale;
+mod batch_downscale;
 mod kmeans;
 mod pixelsort;
 mod rw_image;
 mod threadpool;
+mod utils;
 
-#[derive(Parser)]
-#[command(
-    version,
-    about,
-    long_about = None,
-    propagate_version = true
-)]
-struct InputArguments {
-    #[command(subcommand)]
-    command: ImageCommand,
-}
-
-#[derive(Subcommand)]
-enum ImageCommand {
-    ImageResize {
-        #[arg(required = true)]
-        path: Option<String>,
-    },
-
-    Kmeans {
-        #[arg(required = true)]
-        path: Option<String>,
-    },
-
-    EdgeDetect {
-        #[arg(required = true)]
-        path: Option<String>,
-
-        #[arg(long, default_value_t = 30.0, help = "Threshold for edge detection.")]
-        threshold: f32,
-
-        #[arg(
-            long,
-            default_value_t = false,
-            help = "Blackout non-edge pixels in edge detection."
-        )]
-        blackout: bool,
-    },
-
-    BatchResize {
-        #[arg(required = true)]
-        path: Option<String>,
-
-        #[arg(required = true, help = "File format to filter by for batch resizing.")]
-        extension: Option<String>,
-    },
-
-    PixelSort {
-        #[arg(required = true)]
-        path: Option<String>,
-    },
-}
-
-fn route_command(args: InputArguments) {
+fn route_command(args: cli::InputArguments) {
     match args.command {
-        ImageCommand::EdgeDetect {
+        cli::ImageCommand::EdgeDetect {
             path,
             threshold,
             blackout,
@@ -75,31 +25,48 @@ fn route_command(args: InputArguments) {
                 blackout,
             );
         }
-        ImageCommand::ImageResize { path } => {
-            let _ = image_resize::image_resize(&mut rw_image::ImageDetails::new_image(
+        cli::ImageCommand::ImageDownscale { path } => {
+            let _ = image_downscale::image_downscale(&mut rw_image::ImageDetails::new_image(
                 path.as_ref().expect("No path!"),
             ));
         }
-        ImageCommand::Kmeans { path } => {
+        cli::ImageCommand::Kmeans { path } => {
             let _ = kmeans::k_means_fast(rw_image::ImageDetails::new_image(
                 path.as_ref().expect("No path!"),
             ));
         }
-        ImageCommand::BatchResize { path, extension } => {
-            let _ = batch_resize::batch_resize(
+        cli::ImageCommand::BatchDownscale { path, extension } => {
+            let _ = batch_downscale::batch_downscale(
                 path.expect("No path!"),
                 extension.expect("No file format provided!"),
             );
         }
-        ImageCommand::PixelSort { path } => {
-            let _ = pixelsort::pixel_sort(rw_image::ImageDetails::new_image(
-                path.as_ref().expect("No path!"),
-            ));
+        cli::ImageCommand::PixelSort {
+            path,
+            threshold,
+            direction,
+        } => {
+            let _ = pixelsort::pixel_sort(
+                rw_image::ImageDetails::new_image(path.as_ref().expect("No path!")),
+                threshold,
+                match direction {
+                    Some(x) => {
+                        if x == "horizontal" {
+                            cli::PixelSortDir::Horizontal
+                        } else if x == "vertical" {
+                            cli::PixelSortDir::Vertical
+                        } else {
+                            cli::PixelSortDir::Diagonal
+                        }
+                    }
+                    None => cli::PixelSortDir::Diagonal,
+                },
+            );
         }
     }
 }
 
 fn main() {
-    let args: InputArguments = InputArguments::parse();
+    let args: cli::InputArguments = cli::InputArguments::parse();
     route_command(args);
 }

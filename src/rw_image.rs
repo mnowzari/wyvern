@@ -28,6 +28,11 @@ impl ImageDetails {
         Ok(rgb)
     }
 
+    ///
+    /// When an image is saved, an ImageDetails instance will be updated
+    /// represent the 'saved' image. This is why save_image updates
+    /// the filepath, width and height fields as well.
+    ///
     pub fn save_image(
         &mut self,
         image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
@@ -40,10 +45,12 @@ impl ImageDetails {
             filename_postfix,
             self.extension.to_str().unwrap()
         ));
-        // update the filepath field as this struct now represents the 'saved' image
-        self.filepath = save_path.clone();
 
-        println!("{}\n", self.filepath.to_str().unwrap());
+        self.filepath = save_path.clone();
+        self.width = image_buf.width();
+        self.height = image_buf.height();
+
+        println!("{}", self.filepath.to_str().unwrap());
 
         match image_buf.save(save_path) {
             Ok(_) => Ok(true),

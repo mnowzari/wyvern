@@ -1,17 +1,16 @@
 use std::{error::Error, ffi::OsString, fs, path::PathBuf};
 
 use glob::glob;
-
 use num_cpus;
 
-use crate::image_resize::image_resize;
+use crate::image_downscale::image_downscale;
 use crate::rw_image::{self, ImageDetails};
 use crate::threadpool::ThreadPool;
 
-pub fn batch_resize(directory: String, file_format: String) -> Result<(), Box<dyn Error>> {
+pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box<dyn Error>> {
     let pool: ThreadPool = ThreadPool::new(num_cpus::get()).unwrap();
 
-    let subdir_name: String = String::from("resized_images");
+    let subdir_name: String = String::from("downscaled_images");
 
     // first, ensure the provided dir is valid
     if !PathBuf::from(&directory).is_dir() {
@@ -22,7 +21,7 @@ pub fn batch_resize(directory: String, file_format: String) -> Result<(), Box<dy
     let pattern: String = format!("{}\\*.{}", directory, file_format);
     println!("Searching {}\n", pattern);
 
-    // glob through directory & resize each image we encounter and save it in our subdir
+    // glob through directory & downscale each image we encounter and save it in our subdir
     for entry in glob(pattern.as_str()).expect("Failed to read directory path!") {
         match entry {
             Ok(image_path) => {
@@ -39,7 +38,7 @@ pub fn batch_resize(directory: String, file_format: String) -> Result<(), Box<dy
                     ));
 
                     pool.execute(move || {
-                        match image_resize(&mut img_det_t) {
+                        match image_downscale(&mut img_det_t) {
                             Ok(_x) => {}
                             Err(_x) => println!(
                                 "An error occurred resizing {}!",
