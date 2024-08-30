@@ -1,14 +1,16 @@
+use crate::{cli::PixelSortDir, rw_image::ImageDetails, utils::calc_distance};
+
+use image::{ImageBuffer, Rgb};
+
 use rand::Rng;
 use std::error::Error;
 
-use crate::{cli::PixelSortDir, rw_image, utils};
-
 pub fn pixel_sort(
-    mut image_details: rw_image::ImageDetails,
+    image_details: &mut ImageDetails,
     threshold: f32,
     direction: PixelSortDir,
 ) -> Result<bool, Box<dyn Error>> {
-    let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+    let mut image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
     let width = image_details.width;
@@ -17,14 +19,14 @@ pub fn pixel_sort(
     let random_x_coord: u32 = rand::thread_rng().gen_range(2..width);
     let random_y_coord: u32 = rand::thread_rng().gen_range(2..height);
     // clone this pixel as we will need it later
-    let comparison_px: image::Rgb<u8> = image_buf.get_pixel(random_x_coord, random_y_coord).clone();
+    let comparison_px: Rgb<u8> = image_buf.get_pixel(random_x_coord, random_y_coord).clone();
 
     for row in 1..width {
         for col in 1..height {
-            let px: image::Rgb<u8> = image_buf.get_pixel(row, col).clone();
+            let px: Rgb<u8> = image_buf.get_pixel(row, col).clone();
 
             // calculate distance
-            let distance = utils::calc_distance(
+            let distance = calc_distance(
                 &f32::from(px[0]),
                 &f32::from(px[1]),
                 &f32::from(px[2]),

@@ -1,13 +1,13 @@
+use crate::{rw_image::ImageDetails, utils::calc_distance};
+
 use rand::Rng;
 use std::error::Error;
-
-use crate::{rw_image, utils};
 
 const NUM_OF_POINTS: usize = 16;
 const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
 const DISTANCE: f32 = 10.0;
 
-pub fn k_means_fast(mut image_details: rw_image::ImageDetails) -> Result<(), Box<dyn Error>> {
+pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<(), Box<dyn Error>> {
     let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
@@ -36,7 +36,7 @@ pub fn k_means_fast(mut image_details: rw_image::ImageDetails) -> Result<(), Box
             let mut counter: u8 = 1;
 
             for s_idx in 1..sample_pixels.len() {
-                let distance: f32 = utils::calc_distance(
+                let distance: f32 = calc_distance(
                     &target_point[0],
                     &target_point[1],
                     &target_point[2],

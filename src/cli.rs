@@ -65,6 +65,16 @@ pub enum ImageCommand {
         )]
         direction: Option<String>,
     },
+
+    Denoise {
+        #[arg(required = true)]
+        path: Option<String>,
+    },
+
+    Greyscale {
+        #[arg(required = true)]
+        path: Option<String>,
+    },
 }
 
 #[derive(Clone)]

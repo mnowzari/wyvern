@@ -1,8 +1,11 @@
-use crate::rw_image::ImageDetails;
+use crate::{rw_image::ImageDetails, utils::compute_rgb_distance};
+
+use image::{ImageBuffer, Rgb};
+
 use std::error::Error;
 
-const GREEN_HIGHLIGHT_PX: image::Rgb<u8> = image::Rgb([0, 255, 0]);
-const BLACKOUT_PX: image::Rgb<u8> = image::Rgb([0, 0, 0]);
+const GREEN_HIGHLIGHT_PX: Rgb<u8> = Rgb([0, 255, 0]);
+const BLACKOUT_PX: Rgb<u8> = Rgb([0, 0, 0]);
 
 pub fn edge_detect(
     image_details: &mut ImageDetails,
@@ -10,7 +13,7 @@ pub fn edge_detect(
     blackout: bool,
 ) -> Result<bool, Box<dyn Error>> {
     // main edge detection function
-    let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+    let mut image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
     let width: u32 = image_details.width;
@@ -58,14 +61,6 @@ pub fn edge_detect(
     Ok(image_details.save_image(image_buf, &"edges")?)
 }
 
-fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {
-    f32::sqrt(
-        f32::powf(pixel[0] as f32, 2.0)
-            + f32::powf(pixel[1] as f32, 2.0)
-            + f32::powf(pixel[2] as f32, 2.0),
-    )
-}
-
 fn compute_std_dev(
     mean: f32,
     px_top_right: f32,
@@ -86,24 +81,6 @@ fn compute_std_dev(
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_compute_rgb_distance() {
-        let expected: [f32; 5] = [0.0, 22.22611, 87.19518, 121.81133, 55.090836];
-
-        let test_points: [image::Rgb<u8>; 5] = [
-            image::Rgb([0, 0, 0]),
-            image::Rgb([10, 15, 13]),
-            image::Rgb([33, 45, 67]),
-            image::Rgb([101, 34, 59]),
-            image::Rgb([55, 3, 1]),
-        ];
-
-        for idx in 0..5 {
-            let res: f32 = compute_rgb_distance(&test_points[idx]);
-            assert_eq!(expected[idx], res);
-        }
-    }
 
     #[test]
     fn test_compute_std_dev() {

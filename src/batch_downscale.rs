@@ -1,11 +1,11 @@
 use std::{error::Error, ffi::OsString, fs, path::PathBuf};
 
+use crate::image_downscale::image_downscale;
+use crate::rw_image::ImageDetails;
+use crate::threadpool::ThreadPool;
+
 use glob::glob;
 use num_cpus;
-
-use crate::image_downscale::image_downscale;
-use crate::rw_image::{self, ImageDetails};
-use crate::threadpool::ThreadPool;
 
 pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box<dyn Error>> {
     let pool: ThreadPool = ThreadPool::new(num_cpus::get()).unwrap();
@@ -28,8 +28,7 @@ pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box
                 if check_or_create_subdir(&directory, &subdir_name) {
                     let image_path_string: String = String::from(image_path.to_str().unwrap());
 
-                    let mut img_det_t: ImageDetails =
-                        rw_image::ImageDetails::new_image(&image_path_string);
+                    let mut img_det_t: ImageDetails = ImageDetails::new_image(&image_path_string);
 
                     img_det_t.basedir = OsString::from(format!(
                         "{}\\{}",

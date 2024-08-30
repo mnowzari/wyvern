@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use image::io::Reader;
+use image::{io::Reader, ImageBuffer, Rgb};
 
 pub struct ImageDetails {
     pub filepath: OsString,  // complete filepath
@@ -16,10 +16,8 @@ pub struct ImageDetails {
 }
 
 impl ImageDetails {
-    pub fn load_image(
-        &mut self,
-    ) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, Box<dyn Error>> {
-        let rgb: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+    pub fn load_image(&mut self) -> Result<ImageBuffer<Rgb<u8>, Vec<u8>>, Box<dyn Error>> {
+        let rgb: ImageBuffer<Rgb<u8>, Vec<u8>> =
             Reader::open(&self.filepath)?.decode()?.into_rgb8();
 
         self.width = rgb.width();
@@ -28,14 +26,12 @@ impl ImageDetails {
         Ok(rgb)
     }
 
-    ///
     /// When an image is saved, an ImageDetails instance will be updated
     /// represent the 'saved' image. This is why save_image updates
     /// the filepath, width and height fields as well.
-    ///
     pub fn save_image(
         &mut self,
-        image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
+        image_buf: ImageBuffer<Rgb<u8>, Vec<u8>>,
         filename_postfix: &str,
     ) -> Result<bool, Box<dyn Error>> {
         let save_path: OsString = OsString::from(format!(

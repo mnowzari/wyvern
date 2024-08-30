@@ -1,11 +1,12 @@
+#[allow(dead_code, unused)]
 use clap::Parser;
 
-#[allow(dead_code, unused)]
+mod batch_downscale;
 mod cli;
 mod denoise;
 mod edge_detect;
+mod greyscale;
 mod image_downscale;
-mod batch_downscale;
 mod kmeans;
 mod pixelsort;
 mod rw_image;
@@ -31,7 +32,7 @@ fn route_command(args: cli::InputArguments) {
             ));
         }
         cli::ImageCommand::Kmeans { path } => {
-            let _ = kmeans::k_means_fast(rw_image::ImageDetails::new_image(
+            let _ = kmeans::k_means_fast(&mut rw_image::ImageDetails::new_image(
                 path.as_ref().expect("No path!"),
             ));
         }
@@ -47,7 +48,7 @@ fn route_command(args: cli::InputArguments) {
             direction,
         } => {
             let _ = pixelsort::pixel_sort(
-                rw_image::ImageDetails::new_image(path.as_ref().expect("No path!")),
+                &mut rw_image::ImageDetails::new_image(path.as_ref().expect("No path!")),
                 threshold,
                 match direction {
                     Some(x) => {
@@ -62,6 +63,16 @@ fn route_command(args: cli::InputArguments) {
                     None => cli::PixelSortDir::Diagonal,
                 },
             );
+        }
+        cli::ImageCommand::Denoise { path } => {
+            let _ = denoise::denoise(&mut rw_image::ImageDetails::new_image(
+                path.as_ref().expect("No path!"),
+            ));
+        }
+        cli::ImageCommand::Greyscale { path } => {
+            let _ = greyscale::greyscale_convert(rw_image::ImageDetails::new_image(
+                path.as_ref().expect("No path!"),
+            ));
         }
     }
 }
