@@ -1,9 +1,16 @@
 use std::error::Error;
 
-use crate::{rw_image::ImageDetails, utils::average_pixel_values};
+use crate::{
+    rw_image::ImageDetails,
+    utils::{average_pixel_values, calc_distance},
+};
 
-pub fn denoise(image_details: &mut ImageDetails) -> Result<(), Box<dyn Error>> {
-    let mut image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+use image::{ImageBuffer, Rgb};
+
+const GREEN_HIGHLIGHT_PX: Rgb<u8> = Rgb([0, 255, 0]);
+
+pub fn denoise(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>> {
+    let mut image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
     let width: u32 = image_details.width;
@@ -13,28 +20,67 @@ pub fn denoise(image_details: &mut ImageDetails) -> Result<(), Box<dyn Error>> {
     while row < width - 1 {
         let mut col: u32 = 1;
         while col < height - 1 {
-            let px_top_right: &image::Rgb<u8> = image_buf.get_pixel(row - 1, col);
-            let px_top_left: &image::Rgb<u8> = image_buf.get_pixel(row - 1, col - 1);
-            let px_bottom_right: &image::Rgb<u8> = image_buf.get_pixel(row, col);
-            let px_bottom_left: &image::Rgb<u8> = image_buf.get_pixel(row, col - 1);
+            // array of references to pixels in image_buf
+            let px_subset: [&Rgb<u8>; 4] = [
+                image_buf.get_pixel(row - 1, col),
+                image_buf.get_pixel(row - 1, col - 1),
+                image_buf.get_pixel(row, col),
+                image_buf.get_pixel(row, col - 1),
+            ];
 
-            // calculate the average RGB values of the 2x2 grid of pixels
-            let px_avg: image::Rgb<u8> =
-                average_pixel_values(px_top_right, px_top_left, px_bottom_right, px_bottom_left);
+            // calculate the average RGB value for the 2x2 grid we are at
+            let px_avg: Rgb<u8> =
+                average_pixel_values(&px_subset[0], &px_subset[1], &px_subset[2], &px_subset[3]);
 
-            // calculate distance between each pixel in the grid and the average pixel
-            // let distance = calc_distance(
-            //     r1,
-            //     g1,
-            //     b1,
-            //     r2,
-            //     g2,
-            //     b2
-            // );
+            match get_hot_pixel_index(px_subset, &px_avg) {
+                Some(x) => match x {
+                    0 => image_buf.put_pixel(row - 1, col, px_avg),
+                    1 => image_buf.put_pixel(row - 1, col - 1, px_avg),
+                    2 => image_buf.put_pixel(row, col, px_avg),
+                    3 => image_buf.put_pixel(row, col - 1, px_avg),
+                    _ => {}
+                },
+                None => {}
+            }
 
             col += 2
         }
         row += 2
     }
-    Ok(())
+    Ok(image_details.save_image(image_buf, &"denoised")?)
+}
+
+fn get_hot_pixel_index(pixel_subset: [&Rgb<u8>; 4], px_avg: &Rgb<u8>) -> Option<usize> {
+    let mut max_idx: usize = 0;
+    let mut max_dist: f32 = 0.0;
+    let mut all_dist: [i32; 4] = [0; 4];
+
+    for i in 0..pixel_subset.len() {
+        let dist: f32 = calc_distance(
+            &f32::from(px_avg[0]),
+            &f32::from(px_avg[1]),
+            &f32::from(px_avg[2]),
+            &f32::from(pixel_subset[i][0]),
+            &f32::from(pixel_subset[i][1]),
+            &f32::from(pixel_subset[i][2]),
+        );
+
+        if dist > max_dist {
+            max_dist = dist;
+            max_idx = i;
+        }
+
+        all_dist[i] = dist as i32; // bc Rust won't sort an array of f32
+    }
+
+    all_dist.sort();
+
+    let typ_dist_sum: i32 = all_dist[0..3].iter().sum();
+    let typical_dist: f32 = typ_dist_sum as f32 / 3.0;
+
+    if max_dist > typical_dist * 2.0 {
+        Some(max_idx)
+    } else {
+        None
+    }
 }

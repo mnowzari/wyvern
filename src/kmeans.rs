@@ -1,5 +1,7 @@
 use crate::{rw_image::ImageDetails, utils::calc_distance};
 
+use image::{ImageBuffer, Rgb};
+
 use rand::Rng;
 use std::error::Error;
 
@@ -8,7 +10,7 @@ const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
 const DISTANCE: f32 = 10.0;
 
 pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<(), Box<dyn Error>> {
-    let image_buf: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+    let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
     let width: u32 = image_details.width;
@@ -74,7 +76,7 @@ pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<(), Box<dyn Erro
 }
 
 fn generate_random_points_for_grid(
-    image_buf: &image::ImageBuffer<image::Rgb<u8>, Vec<u8>>,
+    image_buf: &ImageBuffer<Rgb<u8>, Vec<u8>>,
     row: u32,
     col: u32,
     grid_dim_width: u32,
@@ -86,7 +88,7 @@ fn generate_random_points_for_grid(
         let rand_x: u32 = rand::thread_rng().gen_range((row - grid_dim_height)..row);
         let rand_y: u32 = rand::thread_rng().gen_range((col - grid_dim_width)..col);
 
-        let temp_px: &image::Rgb<u8> = image_buf.get_pixel(rand_x, rand_y);
+        let temp_px: &Rgb<u8> = image_buf.get_pixel(rand_x, rand_y);
 
         k_points[k_idx] = [temp_px[0] as f32, temp_px[1] as f32, temp_px[2] as f32];
     }
