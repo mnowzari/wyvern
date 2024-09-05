@@ -52,7 +52,25 @@ pub fn average_pixel_values(
 
 #[cfg(test)]
 mod tests {
+    use image::Rgb;
+
     use super::*;
+
+    #[test]
+    fn test_average_of_single_rgb_pixel() {
+        let test_pixels: [Rgb<u8>; 4] = [
+            Rgb([0, 0, 0]),
+            Rgb([55, 55, 55]),
+            Rgb([24, 68, 178]),
+            Rgb([255, 255, 255]),
+        ];
+
+        let expected: [u8; 4] = [0, 55, 90, 255];
+
+        for i in 0..test_pixels.len() {
+            assert_eq!(average_of_single_rgb_pixel(&test_pixels[i]), expected[i]);
+        }
+    }
 
     #[test]
     fn test_calc_distance() {
