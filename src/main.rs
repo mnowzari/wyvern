@@ -64,10 +64,21 @@ fn route_command(args: cli::InputArguments) {
                 },
             );
         }
-        cli::ImageCommand::Denoise { path } => {
-            let _ = denoise::denoise(&mut rw_image::ImageDetails::new_image(
-                path.as_ref().expect("No path!"),
-            ));
+        cli::ImageCommand::Denoise {
+            path,
+            threshold,
+            highlight,
+        } => {
+            let _ = denoise::denoise(
+                &mut rw_image::ImageDetails::new_image(path.as_ref().expect("No path!")),
+                match cli::denoise_threshold_between_bounds(&threshold) {
+                    Ok(x) => x,
+                    Err(_) => {
+                        panic!("Please give a number between 1.0 and 100.0!");
+                    }
+                },
+                highlight,
+            );
         }
         cli::ImageCommand::Greyscale { path } => {
             let _ = greyscale::greyscale_convert(rw_image::ImageDetails::new_image(

@@ -9,7 +9,11 @@ use image::{ImageBuffer, Rgb};
 
 const GREEN_HIGHLIGHT_PX: Rgb<u8> = Rgb([0, 255, 0]);
 
-pub fn denoise(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>> {
+pub fn denoise(
+    image_details: &mut ImageDetails,
+    threshold: f32,
+    highlight: bool,
+) -> Result<bool, Box<dyn Error>> {
     let mut image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
 
@@ -32,12 +36,22 @@ pub fn denoise(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>>
             let px_avg: Rgb<u8> =
                 average_pixel_values(&px_subset[0], &px_subset[1], &px_subset[2], &px_subset[3]);
 
-            match get_hot_pixel_index(px_subset, &px_avg) {
+            let replacement_px: &Rgb<u8>;
+            match highlight {
+                false => {
+                    replacement_px = &px_avg;
+                }
+                true => {
+                    replacement_px = &GREEN_HIGHLIGHT_PX;
+                }
+            }
+
+            match get_hot_pixel_index(px_subset, &px_avg, threshold) {
                 Some(x) => match x {
-                    0 => image_buf.put_pixel(row - 1, col, px_avg),
-                    1 => image_buf.put_pixel(row - 1, col - 1, px_avg),
-                    2 => image_buf.put_pixel(row, col, px_avg),
-                    3 => image_buf.put_pixel(row, col - 1, px_avg),
+                    0 => image_buf.put_pixel(row - 1, col, *replacement_px),
+                    1 => image_buf.put_pixel(row - 1, col - 1, *replacement_px),
+                    2 => image_buf.put_pixel(row, col, *replacement_px),
+                    3 => image_buf.put_pixel(row, col - 1, *replacement_px),
                     _ => {}
                 },
                 None => {}
@@ -50,7 +64,11 @@ pub fn denoise(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>>
     Ok(image_details.save_image(image_buf, &"denoised")?)
 }
 
-fn get_hot_pixel_index(pixel_subset: [&Rgb<u8>; 4], px_avg: &Rgb<u8>) -> Option<usize> {
+fn get_hot_pixel_index(
+    pixel_subset: [&Rgb<u8>; 4],
+    px_avg: &Rgb<u8>,
+    threshold: f32,
+) -> Option<usize> {
     let mut max_idx: usize = 0;
     let mut max_dist: f32 = 0.0;
     let mut all_dist: [i32; 4] = [0; 4];
@@ -78,7 +96,7 @@ fn get_hot_pixel_index(pixel_subset: [&Rgb<u8>; 4], px_avg: &Rgb<u8>) -> Option<
     let typ_dist_sum: i32 = all_dist[0..3].iter().sum();
     let typical_dist: f32 = typ_dist_sum as f32 / 3.0;
 
-    if max_dist > typical_dist * 2.0 {
+    if max_dist > typical_dist * threshold {
         Some(max_idx)
     } else {
         None
