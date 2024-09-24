@@ -28,9 +28,9 @@ pub fn edge_detect(
             let px_top_left: f32 = compute_rgb_distance(image_buf.get_pixel(i - 1, k - 1));
             let px_bottom_right: f32 = compute_rgb_distance(image_buf.get_pixel(i, k));
             let px_bottom_left: f32 = compute_rgb_distance(image_buf.get_pixel(i, k - 1));
-            // get the average of all four pixels
+            // get the mean of all four pixels
             let mean: f32 = (px_top_right + px_top_left + px_bottom_left + px_bottom_right) / 4.0;
-            // compute the distance between each pixel in the grid and the average of all four pixels
+            // compute the standard deviation between each pixel in the grid and the mean of the 2x2 grid
             let std_dev: f32 = compute_std_dev(
                 mean,
                 px_top_right,
@@ -40,17 +40,17 @@ pub fn edge_detect(
                 width,
                 height,
             );
-            // compare the resultant distance to the threshold
-            if std_dev > threshold {
-                image_buf.put_pixel(i - 1, k, GREEN_HIGHLIGHT_PX);
-                image_buf.put_pixel(i - 1, k - 1, GREEN_HIGHLIGHT_PX);
-                image_buf.put_pixel(i, k, GREEN_HIGHLIGHT_PX);
-                image_buf.put_pixel(i, k - 1, GREEN_HIGHLIGHT_PX);
-            } else if blackout {
+
+            if blackout {
                 image_buf.put_pixel(i - 1, k, BLACKOUT_PX);
                 image_buf.put_pixel(i - 1, k - 1, BLACKOUT_PX);
                 image_buf.put_pixel(i, k, BLACKOUT_PX);
                 image_buf.put_pixel(i, k - 1, BLACKOUT_PX);
+            }
+
+            // compare the resultant distance to the threshold
+            if std_dev > threshold {
+                image_buf.put_pixel(i, k, GREEN_HIGHLIGHT_PX);
             }
 
             k += 2;

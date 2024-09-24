@@ -32,7 +32,7 @@ pub enum ImageCommand {
             long,
             default_value_t = 30.0,
             help = "Threshold for edge detection.
-        The higher the number, the more edges will be detected, and might give a noisier output."
+        The lower the number, the more edges will be detected, and might give a noisier output."
         )]
         threshold: f32,
 
