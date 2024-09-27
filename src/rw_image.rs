@@ -34,15 +34,18 @@ impl ImageDetails {
         image_buf: ImageBuffer<Rgb<u8>, Vec<u8>>,
         filename_postfix: &str,
     ) -> Result<bool, Box<dyn Error>> {
-        let save_path: OsString = OsString::from(format!(
-            "{}\\{}_{}.{}",
-            self.basedir.to_str().unwrap(),
+        let filename: PathBuf = PathBuf::from(format!("{}_{}.{}", 
             self.filename.to_str().unwrap(),
             filename_postfix,
             self.extension.to_str().unwrap()
         ));
 
-        self.filepath = save_path.clone();
+        let  mut save_path: PathBuf = PathBuf::from(format!(
+            "{}", self.basedir.to_str().unwrap())
+        );
+        save_path.push(filename);
+
+        self.filepath = OsString::from(save_path.clone());
         self.width = image_buf.width();
         self.height = image_buf.height();
 
