@@ -1,4 +1,6 @@
-use std::{error::Error, ffi::OsString, fs, path::PathBuf};
+use std::{error::Error,
+    path::PathBuf,
+    fs};
 
 use crate::image_downscale::image_downscale;
 use crate::rw_image::ImageDetails;
@@ -10,7 +12,7 @@ use num_cpus;
 pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box<dyn Error>> {
     let pool: ThreadPool = ThreadPool::new(num_cpus::get()).unwrap();
 
-    let subdir_name: String = String::from("downscaled_images");
+    let subdir_name: PathBuf = PathBuf::from("downscaled_images");
 
     // first, ensure the provided dir is valid
     if !PathBuf::from(&directory).is_dir() {
@@ -18,23 +20,19 @@ pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box
     }
 
     // create search pattern from the given directory and file format
-    let pattern: String = format!("{}\\*.{}", directory, file_format);
-    println!("Searching {}\n", pattern);
+    let pattern: PathBuf = [&directory, &format!( "*.{}", &file_format)].iter().collect();
+
+    println!("Searching {}\n", pattern.to_str().unwrap());
 
     // glob through directory & downscale each image we encounter and save it in our subdir
-    for entry in glob(pattern.as_str()).expect("Failed to read directory path!") {
+    for entry in glob(pattern.to_str().unwrap()).expect("Failed to read directory path!") {
         match entry {
             Ok(image_path) => {
                 if check_or_create_subdir(&directory, &subdir_name) {
                     let image_path_string: String = String::from(image_path.to_str().unwrap());
 
                     let mut img_det_t: ImageDetails = ImageDetails::new_image(&image_path_string);
-
-                    img_det_t.basedir = OsString::from(format!(
-                        "{}\\{}",
-                        img_det_t.basedir.to_str().unwrap(),
-                        subdir_name
-                    ));
+                    img_det_t.basedir.push(subdir_name.clone());
 
                     pool.execute(move || {
                         match image_downscale(&mut img_det_t) {
@@ -53,8 +51,8 @@ pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box
     Ok(())
 }
 
-fn check_or_create_subdir(directory: &String, subdir_name: &String) -> bool {
-    let path_to_new_subdir: PathBuf = [directory, subdir_name].iter().collect();
+fn check_or_create_subdir(directory: &String, subdir_name: &PathBuf) -> bool {
+    let path_to_new_subdir: PathBuf = [directory, subdir_name.to_str().unwrap()].iter().collect();
     if !path_to_new_subdir.is_dir() {
         match fs::create_dir(path_to_new_subdir) {
             Ok(_x) => return true,
@@ -83,7 +81,7 @@ mod tests {
             Ok(_x) => {
                 let res = check_or_create_subdir(
                     &cwd.display().to_string(),
-                    &temp_dir.display().to_string(),
+                    &temp_dir,
                 );
                 assert_eq!(true, res);
 
@@ -92,7 +90,7 @@ mod tests {
                 // check again now that the dir doesn't exist
                 let res_two: bool = check_or_create_subdir(
                     &cwd.display().to_string(),
-                    &temp_dir.display().to_string(),
+                    &temp_dir,
                 );
                 assert_eq!(true, res_two);
             }
