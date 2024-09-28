@@ -1,6 +1,7 @@
-use std::{error::Error,
-    path::PathBuf,
-    fs};
+use std::{
+    fs,
+    error::Error,
+    path::PathBuf};
 
 use crate::image_downscale::image_downscale;
 use crate::rw_image::ImageDetails;
@@ -64,7 +65,7 @@ fn check_or_create_subdir(directory: &String, subdir_name: &PathBuf) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use std::{env, fs};
+    use std::{fs, env};
 
     use super::*;
 
@@ -72,10 +73,9 @@ mod tests {
     fn test_check_or_create_subdir_subdir_exists() {
         let cwd: PathBuf = env::current_dir().unwrap().clone();
 
-        let temp_dir: PathBuf = PathBuf::from(format!(
-            "{}\\temp_check_or_create\\",
-            cwd.display().to_string()
-        ));
+        let temp_dir: PathBuf = [
+            cwd.display().to_string(),
+            "temp_check_or_create".to_string()].iter().collect();
 
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {

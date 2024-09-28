@@ -89,8 +89,8 @@ impl ImageDetails {
 #[cfg(test)]
 mod tests {
     use std::{
-        env,
         fs,
+        env,
         ffi::OsString
     };
 
@@ -107,12 +107,14 @@ mod tests {
         // create temp dir, as the parent dir must exist
         let cwd: PathBuf = env::current_dir().unwrap().clone();
 
-        let temp_dir: PathBuf = PathBuf::from(format!("{}\\temp\\", cwd.display().to_string()));
+        let temp_dir: PathBuf = [
+            cwd.display().to_string(),
+            "temp".to_string()].iter().collect();
 
-        let temp_image_path: PathBuf = PathBuf::from(format!(
-            "{}\\temp\\fakeimage.png",
-            cwd.display().to_string()
-        ));
+        let temp_image_path: PathBuf = [
+            cwd.display().to_string(),
+            "temp".to_string(),
+            "fakeimage.png".to_string()].iter().collect();
 
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {
