@@ -1,6 +1,5 @@
 '''
 Script to execute cargo tests
-and build a release
 
 This script is intended to be executed
 from INSIDE the ../scripts directory!

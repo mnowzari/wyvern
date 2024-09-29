@@ -1,8 +1,4 @@
-use std::{
-    error::Error,
-    ffi::OsStr,
-    path::PathBuf,
-};
+use std::{error::Error, ffi::OsStr, path::PathBuf};
 
 use image::{io::Reader, ImageBuffer, Rgb};
 
@@ -34,15 +30,14 @@ impl ImageDetails {
         image_buf: ImageBuffer<Rgb<u8>, Vec<u8>>,
         filename_postfix: &str,
     ) -> Result<bool, Box<dyn Error>> {
-        let filename: PathBuf = PathBuf::from(format!("{}_{}.{}", 
+        let filename: PathBuf = PathBuf::from(format!(
+            "{}_{}.{}",
             self.filename.to_str().unwrap(),
             filename_postfix,
             self.extension.to_str().unwrap()
         ));
 
-        let  mut save_path: PathBuf = PathBuf::from(format!(
-            "{}", self.basedir.to_str().unwrap())
-        );
+        let mut save_path: PathBuf = PathBuf::from(format!("{}", self.basedir.to_str().unwrap()));
         save_path.push(filename);
 
         self.filepath = save_path.clone();
@@ -88,11 +83,7 @@ impl ImageDetails {
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        fs,
-        env,
-        ffi::OsString
-    };
+    use std::{env, ffi::OsString, fs};
 
     use super::*;
 
@@ -107,14 +98,17 @@ mod tests {
         // create temp dir, as the parent dir must exist
         let cwd: PathBuf = env::current_dir().unwrap().clone();
 
-        let temp_dir: PathBuf = [
-            cwd.display().to_string(),
-            "temp".to_string()].iter().collect();
+        let temp_dir: PathBuf = [cwd.display().to_string(), "temp".to_string()]
+            .iter()
+            .collect();
 
         let temp_image_path: PathBuf = [
             cwd.display().to_string(),
             "temp".to_string(),
-            "fakeimage.png".to_string()].iter().collect();
+            "fakeimage.png".to_string(),
+        ]
+        .iter()
+        .collect();
 
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {

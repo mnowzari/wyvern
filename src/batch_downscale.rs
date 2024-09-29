@@ -1,7 +1,4 @@
-use std::{
-    fs,
-    error::Error,
-    path::PathBuf};
+use std::{error::Error, fs, path::PathBuf};
 
 use crate::image_downscale::image_downscale;
 use crate::rw_image::ImageDetails;
@@ -21,7 +18,9 @@ pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box
     }
 
     // create search pattern from the given directory and file format
-    let pattern: PathBuf = [&directory, &format!( "*.{}", &file_format)].iter().collect();
+    let pattern: PathBuf = [&directory, &format!("*.{}", &file_format)]
+        .iter()
+        .collect();
 
     println!("Searching {}\n", pattern.to_str().unwrap());
 
@@ -65,7 +64,7 @@ fn check_or_create_subdir(directory: &String, subdir_name: &PathBuf) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, env};
+    use std::{env, fs};
 
     use super::*;
 
@@ -75,23 +74,20 @@ mod tests {
 
         let temp_dir: PathBuf = [
             cwd.display().to_string(),
-            "temp_check_or_create".to_string()].iter().collect();
+            "temp_check_or_create".to_string(),
+        ]
+        .iter()
+        .collect();
 
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {
-                let res = check_or_create_subdir(
-                    &cwd.display().to_string(),
-                    &temp_dir,
-                );
+                let res = check_or_create_subdir(&cwd.display().to_string(), &temp_dir);
                 assert_eq!(true, res);
 
                 // remote temp dir
                 let _ = fs::remove_dir(&temp_dir);
                 // check again now that the dir doesn't exist
-                let res_two: bool = check_or_create_subdir(
-                    &cwd.display().to_string(),
-                    &temp_dir,
-                );
+                let res_two: bool = check_or_create_subdir(&cwd.display().to_string(), &temp_dir);
                 assert_eq!(true, res_two);
             }
             Err(x) => {
