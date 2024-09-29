@@ -1,6 +1,5 @@
 '''
 Script to execute cargo tests
-and build a release
 
 This script is intended to be executed
 from INSIDE the ../scripts directory!
@@ -26,7 +25,8 @@ def teardown() -> bool:
     print("----\nExecuting teardown\n----")
 
     parent_path = Path(os.getcwd()).parent.absolute()
-    search_pattern = f"{parent_path}\\temp*"
+    search_path = os.path.join(parent_path, "temp")
+    search_pattern = f"{search_path}*"
 
     print (f"Searching {parent_path} for {search_pattern}\n")
 
@@ -65,7 +65,8 @@ def rustfmt() -> bool:
     try:
         parent_path = Path(os.getcwd()).parent.absolute()
 
-        cmd = f"rustfmt --verbose {parent_path}\\src\\main.rs"
+        cmd_path = os.path.join(parent_path, "src", "main.rs")
+        cmd = f"rustfmt --verbose {cmd_path}"
         print (f"{cmd}")
         output = sbpc.check_output(cmd, shell=True).decode("utf-8")
         print (f"{output}")

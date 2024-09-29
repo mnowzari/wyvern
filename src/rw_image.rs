@@ -1,16 +1,12 @@
-use std::{
-    error::Error,
-    ffi::{OsStr, OsString},
-    path::PathBuf,
-};
+use std::{error::Error, ffi::OsStr, path::PathBuf};
 
 use image::{io::Reader, ImageBuffer, Rgb};
 
 pub struct ImageDetails {
-    pub filepath: OsString,  // complete filepath
-    pub basedir: OsString,   // base directory (root)
-    pub filename: OsString,  // file name without extension
-    pub extension: OsString, // extension of the given file
+    pub filepath: PathBuf,  // complete filepath
+    pub basedir: PathBuf,   // base directory (root)
+    pub filename: PathBuf,  // file name without extension
+    pub extension: PathBuf, // extension of the given file
     pub width: u32,
     pub height: u32,
 }
@@ -34,13 +30,15 @@ impl ImageDetails {
         image_buf: ImageBuffer<Rgb<u8>, Vec<u8>>,
         filename_postfix: &str,
     ) -> Result<bool, Box<dyn Error>> {
-        let save_path: OsString = OsString::from(format!(
-            "{}\\{}_{}.{}",
-            self.basedir.to_str().unwrap(),
+        let filename: PathBuf = PathBuf::from(format!(
+            "{}_{}.{}",
             self.filename.to_str().unwrap(),
             filename_postfix,
             self.extension.to_str().unwrap()
         ));
+
+        let mut save_path: PathBuf = PathBuf::from(format!("{}", self.basedir.to_str().unwrap()));
+        save_path.push(filename);
 
         self.filepath = save_path.clone();
         self.width = image_buf.width();
@@ -56,7 +54,7 @@ impl ImageDetails {
 
     pub fn new_image(file_path: &String) -> ImageDetails {
         let path: PathBuf = PathBuf::from(file_path);
-        if !path.parent().unwrap().is_dir() {
+        if !&path.parent().unwrap().is_dir() {
             panic!("Could not parse the provided directory! Parent dir is not valid.")
         }
 
@@ -73,10 +71,10 @@ impl ImageDetails {
         };
 
         ImageDetails {
-            filepath: path.as_os_str().to_os_string(),
-            basedir: base_dir.to_os_string(),
-            filename: file_name.to_os_string(),
-            extension: file_ext.to_os_string(),
+            filepath: PathBuf::from(path.clone()),
+            basedir: PathBuf::from(base_dir),
+            filename: PathBuf::from(file_name),
+            extension: PathBuf::from(file_ext),
             width: 0,
             height: 0,
         }
@@ -85,7 +83,7 @@ impl ImageDetails {
 
 #[cfg(test)]
 mod tests {
-    use std::{env, fs};
+    use std::{env, ffi::OsString, fs};
 
     use super::*;
 
@@ -100,12 +98,17 @@ mod tests {
         // create temp dir, as the parent dir must exist
         let cwd: PathBuf = env::current_dir().unwrap().clone();
 
-        let temp_dir: PathBuf = PathBuf::from(format!("{}\\temp\\", cwd.display().to_string()));
+        let temp_dir: PathBuf = [cwd.display().to_string(), "temp".to_string()]
+            .iter()
+            .collect();
 
-        let temp_image_path: PathBuf = PathBuf::from(format!(
-            "{}\\temp\\fakeimage.png",
-            cwd.display().to_string()
-        ));
+        let temp_image_path: PathBuf = [
+            cwd.display().to_string(),
+            "temp".to_string(),
+            "fakeimage.png".to_string(),
+        ]
+        .iter()
+        .collect();
 
         match fs::create_dir(&temp_dir) {
             Ok(_x) => {
