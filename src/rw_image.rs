@@ -53,8 +53,7 @@ impl ImageDetails {
     }
 
     pub fn new_image(file_path: &String) -> ImageDetails {
-        let path: PathBuf = PathBuf::from(file_path).canonicalize()
-            .unwrap();
+        let path: PathBuf = PathBuf::from(file_path).canonicalize().unwrap();
 
         if !&path.parent().unwrap().is_dir() {
             panic!("Could not parse the provided directory! Directory is not valid.")
@@ -103,6 +102,7 @@ mod tests {
         let temp_dir: PathBuf = [cwd.display().to_string(), "temp".to_string()]
             .iter()
             .collect();
+        let _ = fs::create_dir(&temp_dir);
 
         let temp_image_path: PathBuf = [
             cwd.display().to_string(),
@@ -112,7 +112,7 @@ mod tests {
         .iter()
         .collect();
 
-        match fs::create_dir(&temp_dir) {
+        match fs::File::create_new(&temp_image_path) {
             Ok(_x) => {
                 let image_details_instance: ImageDetails =
                     ImageDetails::new_image(&String::from(temp_image_path.display().to_string()));
@@ -139,6 +139,6 @@ mod tests {
             }
         }
         // cleanup temp dir
-        let _ = fs::remove_dir(temp_dir);
+        let _ = fs::remove_file(&temp_image_path);
     }
 }
