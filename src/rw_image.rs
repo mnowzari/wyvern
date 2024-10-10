@@ -53,9 +53,11 @@ impl ImageDetails {
     }
 
     pub fn new_image(file_path: &String) -> ImageDetails {
-        let path: PathBuf = PathBuf::from(file_path);
+        let path: PathBuf = PathBuf::from(file_path).canonicalize()
+            .unwrap();
+
         if !&path.parent().unwrap().is_dir() {
-            panic!("Could not parse the provided directory! Parent dir is not valid.")
+            panic!("Could not parse the provided directory! Directory is not valid.")
         }
 
         let base_dir: &OsStr = path.parent().unwrap().as_os_str();
