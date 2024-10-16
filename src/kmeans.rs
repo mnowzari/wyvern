@@ -1,96 +1,88 @@
-use crate::{rw_image::ImageDetails, utils::calc_distance};
+use crate::{
+    rw_image::ImageDetails,
+    utils::{average_pixel_values, calc_distance},
+};
 
 use image::{ImageBuffer, Rgb};
 
 use rand::Rng;
 use std::error::Error;
 
-const NUM_OF_POINTS: usize = 16;
-const SUBDIV_FOR_FAST_KMEANS: f32 = 3.0;
+const TEST_POINTS: usize = 24;
+const SAMPLE_POINTS: usize = 512;
 const DISTANCE: f32 = 10.0;
 
-pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<(), Box<dyn Error>> {
+pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>> {
     let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
         image_details.load_image().expect("Failure loading image!");
+
+    let mut output_buf: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::new(3072, 512);
 
     let width: u32 = image_details.width;
     let height: u32 = image_details.height;
 
-    let grid_dim_width: u32 = (width as f32 / SUBDIV_FOR_FAST_KMEANS).floor() as u32;
-    let grid_dim_height: u32 = (height as f32 / SUBDIV_FOR_FAST_KMEANS).floor() as u32;
+    let mut test_points: [[f32; 3]; TEST_POINTS] = [[0.0; 3]; TEST_POINTS];
+    let mut test_point_counters: [f32; TEST_POINTS] = [1.0; TEST_POINTS];
 
-    let mut grid_results: Vec<[f32; 3]> = vec![];
+    for k_idx in 0..SAMPLE_POINTS {
+        let rand_w: u32 = rand::thread_rng().gen_range(128..width);
+        let rand_h: u32 = rand::thread_rng().gen_range(128..height);
 
-    let mut row: u32 = grid_dim_height;
-    while row < width - 1 {
-        let mut col: u32 = grid_dim_width;
-        while col < height - 1 {
-            // generate random points in the grid we are at
-            let sample_pixels: [[f32; 3]; NUM_OF_POINTS] = generate_random_points_for_grid(
-                &image_buf,
-                row,
-                col,
-                grid_dim_width,
-                grid_dim_height,
-            );
+        // get the average RGB values of a 2x2 grid
+        let tr: &Rgb<u8> = image_buf.get_pixel(rand_w - 1, rand_h);
+        let tl: &Rgb<u8> = image_buf.get_pixel(rand_w - 1, rand_h - 1);
+        let br: &Rgb<u8> = image_buf.get_pixel(rand_w, rand_h);
+        let bl: &Rgb<u8> = image_buf.get_pixel(rand_w, rand_h - 1);
 
-            let mut target_point: [f32; 3] = sample_pixels[0];
-            let mut counter: u8 = 1;
+        let temp_px: Rgb<u8> = average_pixel_values(tr, tl, br, bl);
 
-            for s_idx in 1..sample_pixels.len() {
+        if k_idx < TEST_POINTS {
+            // the first several points we generate become our test points
+            test_points[k_idx] = [temp_px[0] as f32, temp_px[1] as f32, temp_px[2] as f32];
+        } else {
+            // the rest become sample points that we can compare against the test points
+            for (tp_idx, tp) in test_points.iter_mut().enumerate() {
                 let distance: f32 = calc_distance(
-                    &target_point[0],
-                    &target_point[1],
-                    &target_point[2],
-                    &sample_pixels[s_idx][0],
-                    &sample_pixels[s_idx][1],
-                    &sample_pixels[s_idx][2],
+                    &(temp_px[0] as f32),
+                    &(temp_px[1] as f32),
+                    &(temp_px[2] as f32),
+                    &tp[0],
+                    &tp[1],
+                    &tp[2],
                 );
 
                 if distance < DISTANCE {
-                    target_point[0] += sample_pixels[s_idx][0];
-                    target_point[1] += sample_pixels[s_idx][1];
-                    target_point[2] += sample_pixels[s_idx][2];
-                    counter += 1;
+                    // increment this test points' counter
+                    test_point_counters[tp_idx] += 1.0;
+                    // and calculate its new average
+                    tp[0] = (tp[0] + temp_px[0] as f32) / test_point_counters[tp_idx];
+                    tp[1] = (tp[1] + temp_px[1] as f32) / test_point_counters[tp_idx];
+                    tp[2] = (tp[2] + temp_px[2] as f32) / test_point_counters[tp_idx];
+                    break;
                 }
             }
-
-            for fin_idx in 0..target_point.len() {
-                target_point[fin_idx] = target_point[fin_idx] / counter as f32;
-            }
-
-            grid_results.push(target_point);
-
-            col += grid_dim_width;
         }
-        row += grid_dim_height;
     }
 
-    for grid_color in grid_results {
-        println!(
-            "R:{} G:{} B:{}",
-            grid_color[0] as u8, grid_color[1] as u8, grid_color[2] as u8
-        );
+    // generate the output image
+    let mut start_x: u32 = 0;
+    let mut end_x: u32 = 128;
+    for grid_color in test_points {
+        for x in start_x..end_x {
+            for y in 0..512 {
+                output_buf.put_pixel(
+                    x,
+                    y,
+                    Rgb([
+                        grid_color[0] as u8,
+                        grid_color[1] as u8,
+                        grid_color[2] as u8,
+                    ]),
+                );
+            }
+        }
+        start_x += 128;
+        end_x += 128;
     }
-    Ok(())
-}
-
-fn generate_random_points_for_grid(
-    image_buf: &ImageBuffer<Rgb<u8>, Vec<u8>>,
-    row: u32,
-    col: u32,
-    grid_dim_width: u32,
-    grid_dim_height: u32,
-) -> [[f32; 3]; NUM_OF_POINTS] {
-    let mut k_points: [[f32; 3]; NUM_OF_POINTS] = [[0.0; 3]; NUM_OF_POINTS];
-
-    for k_idx in 0..NUM_OF_POINTS {
-        let rand_x: u32 = rand::thread_rng().gen_range((row - grid_dim_height)..row);
-        let rand_y: u32 = rand::thread_rng().gen_range((col - grid_dim_width)..col);
-
-        let temp_px: &Rgb<u8> = image_buf.get_pixel(rand_x, rand_y);
-
-        k_points[k_idx] = [temp_px[0] as f32, temp_px[1] as f32, temp_px[2] as f32];
-    }
-    k_points
+    Ok(image_details.save_image(output_buf, &"common_colors")?)
 }
