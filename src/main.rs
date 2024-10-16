@@ -26,12 +26,12 @@ fn route_command(args: cli::InputArguments) {
                 blackout,
             );
         }
-        cli::ImageCommand::ImageDownscale { path } => {
+        cli::ImageCommand::Downscale { path } => {
             let _ = image_downscale::image_downscale(&mut rw_image::ImageDetails::new_image(
                 path.as_ref().expect("No path!"),
             ));
         }
-        cli::ImageCommand::Kmeans { path } => {
+        cli::ImageCommand::CommonColors { path } => {
             let _ = kmeans::k_means_fast(&mut rw_image::ImageDetails::new_image(
                 path.as_ref().expect("No path!"),
             ));
@@ -89,6 +89,5 @@ fn route_command(args: cli::InputArguments) {
 }
 
 fn main() {
-    let args: cli::InputArguments = cli::InputArguments::parse();
-    route_command(args);
+    route_command(cli::InputArguments::parse());
 }

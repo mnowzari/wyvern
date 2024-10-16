@@ -14,12 +14,12 @@ pub struct InputArguments {
 
 #[derive(Subcommand)]
 pub enum ImageCommand {
-    ImageDownscale {
+    Downscale {
         #[arg(required = true)]
         path: Option<String>,
     },
 
-    Kmeans {
+    CommonColors {
         #[arg(required = true)]
         path: Option<String>,
     },
