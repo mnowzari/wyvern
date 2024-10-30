@@ -74,6 +74,7 @@ def rustfmt() -> bool:
         err_msg(excp, cmd)
 
 if __name__ == "__main__":
+    teardown() # preflight teardown to be safe
     rustfmt()
     execute_tests()
     teardown()

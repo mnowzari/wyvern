@@ -84,5 +84,9 @@ pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Er
         start_x += 128;
         end_x += 128;
     }
-    Ok(image_details.save_image(output_buf, &"common_colors")?)
+
+    // create a new ImageDetails object to create the output image
+    let mut output_image: ImageDetails =
+        ImageDetails::new_image(&image_details.filepath.display().to_string());
+    Ok(output_image.save_image(output_buf, &"common_colors")?)
 }
