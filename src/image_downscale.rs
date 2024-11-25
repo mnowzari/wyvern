@@ -1,6 +1,6 @@
 use crate::{rw_image::ImageDetails, utils::average_pixel_values};
 
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb};
 
 use std::error::Error;
 
@@ -35,5 +35,5 @@ pub fn image_downscale(image_details: &mut ImageDetails) -> Result<bool, Box<dyn
         i += 2;
     }
 
-    Ok(image_details.save_image(output_buf, &"downscaled")?)
+    Ok(image_details.save_image(DynamicImage::ImageRgb8(output_buf), &"downscaled")?)
 }

@@ -1,6 +1,6 @@
 use std::{error::Error, ffi::OsStr, path::PathBuf};
 
-use image::{io::Reader, ImageBuffer, Rgb};
+use image::{io::Reader, DynamicImage, ImageBuffer, Rgb};
 
 pub struct ImageDetails {
     pub filepath: PathBuf,  // complete filepath
@@ -27,7 +27,7 @@ impl ImageDetails {
     /// the filepath, width and height fields as well.
     pub fn save_image(
         &mut self,
-        image_buf: ImageBuffer<Rgb<u8>, Vec<u8>>,
+        image_buf: DynamicImage,
         filename_postfix: &str,
     ) -> Result<bool, Box<dyn Error>> {
         let filename: PathBuf = PathBuf::from(format!(

@@ -1,6 +1,6 @@
 use crate::{rw_image::ImageDetails, utils::compute_rgb_distance};
 
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb};
 
 use std::error::Error;
 
@@ -58,7 +58,7 @@ pub fn edge_detect(
         i += 2;
     }
 
-    Ok(image_details.save_image(image_buf, &"edges")?)
+    Ok(image_details.save_image(DynamicImage::ImageRgb8(image_buf), &"edges")?)
 }
 
 fn compute_std_dev(
