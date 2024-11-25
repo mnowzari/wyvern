@@ -1,6 +1,6 @@
 use crate::{cli::PixelSortDir, rw_image::ImageDetails, utils::calc_distance};
 
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb};
 
 use rand::Rng;
 use std::error::Error;
@@ -56,5 +56,5 @@ pub fn pixel_sort(
             }
         }
     }
-    Ok(image_details.save_image(image_buf, &"pixelsorted")?)
+    Ok(image_details.save_image(DynamicImage::ImageRgb8(image_buf), &"pixelsorted")?)
 }

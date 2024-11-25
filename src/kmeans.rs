@@ -3,7 +3,7 @@ use crate::{
     utils::{average_pixel_values, calc_distance},
 };
 
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb};
 
 use rand::Rng;
 use std::error::Error;
@@ -88,5 +88,5 @@ pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Er
     // create a new ImageDetails object to create the output image
     let mut output_image: ImageDetails =
         ImageDetails::new_image(&image_details.filepath.display().to_string());
-    Ok(output_image.save_image(output_buf, &"common_colors")?)
+    Ok(output_image.save_image(DynamicImage::ImageRgb8(output_buf), &"common_colors")?)
 }

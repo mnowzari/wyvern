@@ -5,7 +5,7 @@ use crate::{
     utils::{average_pixel_values, calc_distance},
 };
 
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb};
 
 const GREEN_HIGHLIGHT_PX: Rgb<u8> = Rgb([0, 255, 0]);
 
@@ -61,7 +61,7 @@ pub fn denoise(
         }
         row += 2
     }
-    Ok(image_details.save_image(image_buf, &"denoised")?)
+    Ok(image_details.save_image(DynamicImage::ImageRgb8(image_buf), &"denoised")?)
 }
 
 fn get_hot_pixel_index(
