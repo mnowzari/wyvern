@@ -5,8 +5,10 @@ use image::{DynamicImage, ImageBuffer, Luma, Rgb};
 use std::error::Error;
 
 pub fn greyscale_convert(mut image_details: ImageDetails) -> Result<bool, Box<dyn Error>> {
-    let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
-        image_details.load_image().expect("Failure loading image!");
+    let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> = image_details
+        .load_image()
+        .expect("Failure loading image!")
+        .into_rgb8();
 
     let width: u32 = image_details.width;
     let height: u32 = image_details.height;

@@ -10,8 +10,10 @@ pub fn pixel_sort(
     threshold: f32,
     direction: PixelSortDir,
 ) -> Result<bool, Box<dyn Error>> {
-    let mut image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
-        image_details.load_image().expect("Failure loading image!");
+    let mut image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> = image_details
+        .load_image()
+        .expect("Failure loading image!")
+        .into_rgb8();
 
     let width = image_details.width;
     let height = image_details.height;
