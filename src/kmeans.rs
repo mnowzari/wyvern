@@ -13,8 +13,10 @@ const SAMPLE_POINTS: usize = 512;
 const DISTANCE: f32 = 10.0;
 
 pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Error>> {
-    let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> =
-        image_details.load_image().expect("Failure loading image!");
+    let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> = image_details
+        .load_image()
+        .expect("Failure loading image!")
+        .into_rgb8();
 
     let mut output_buf: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::new(3072, 512);
 

@@ -1,6 +1,6 @@
 use std::{error::Error, ffi::OsStr, path::PathBuf};
 
-use image::{io::Reader, DynamicImage, ImageBuffer, Rgb};
+use image::{io::Reader, DynamicImage};
 
 pub struct ImageDetails {
     pub filepath: PathBuf,  // complete filepath
@@ -12,9 +12,8 @@ pub struct ImageDetails {
 }
 
 impl ImageDetails {
-    pub fn load_image(&mut self) -> Result<ImageBuffer<Rgb<u8>, Vec<u8>>, Box<dyn Error>> {
-        let rgb: ImageBuffer<Rgb<u8>, Vec<u8>> =
-            Reader::open(&self.filepath)?.decode()?.into_rgb8();
+    pub fn load_image(&mut self) -> Result<DynamicImage, Box<dyn Error>> {
+        let rgb: DynamicImage = Reader::open(&self.filepath)?.decode()?;
 
         self.width = rgb.width();
         self.height = rgb.height();
