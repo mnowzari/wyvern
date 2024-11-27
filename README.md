@@ -40,6 +40,7 @@ This will pixel sort and save the output under _\path\to\image_pixelsorted_
 
 #### Denoise an image
 This will denoise a given image and save the denoised output under _\path\to\image_denoised_
+
     wyvern denoise "path\to\image"
 
 As always, use the _--help_ flag to learn more about each command and the particular flags/args you can provide.
