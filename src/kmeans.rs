@@ -44,6 +44,7 @@ pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Er
         } else {
             // the rest become sample points that we can compare against the test points
             for (tp_idx, tp) in test_points.iter_mut().enumerate() {
+
                 let distance: f32 = calc_distance(
                     &(temp_px[0] as f32),
                     &(temp_px[1] as f32),
@@ -90,5 +91,5 @@ pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Er
     // create a new ImageDetails object to create the output image
     let mut output_image: ImageDetails =
         ImageDetails::new_image(&image_details.filepath.display().to_string());
-    Ok(output_image.save_image(DynamicImage::ImageRgb8(output_buf), &"common_colors")?)
+    output_image.save_image(DynamicImage::ImageRgb8(output_buf), "common_colors")
 }

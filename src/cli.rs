@@ -107,7 +107,7 @@ pub enum PixelSortDir {
 
 pub fn denoise_threshold_between_bounds(f: &f32) -> Result<f32, ()> {
     let f_val: f32 = *f;
-    if f_val >= 1.0 && f_val <= 100.0 {
+    if (1.0..=100.0).contains(&f_val) {
         Ok(f_val)
     } else {
         Err(())

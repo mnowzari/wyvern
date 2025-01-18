@@ -23,9 +23,9 @@ pub fn denoise(
     let height: u32 = image_details.height;
 
     let mut row: u32 = 1;
-    while row < width - 1 {
+    while row < width {
         let mut col: u32 = 1;
-        while col < height - 1 {
+        while col < height {
             // array of references to pixels in image_buf
             let px_subset: [&Rgb<u8>; 4] = [
                 image_buf.get_pixel(row - 1, col),
@@ -36,17 +36,16 @@ pub fn denoise(
 
             // calculate the average RGB value for the 2x2 grid we are at
             let px_avg: Rgb<u8> =
-                average_pixel_values(&px_subset[0], &px_subset[1], &px_subset[2], &px_subset[3]);
+                average_pixel_values(px_subset[0], px_subset[1], px_subset[2], px_subset[3]);
 
-            let replacement_px: &Rgb<u8>;
-            match highlight {
+            let replacement_px: &Rgb<u8> = match highlight {
                 false => {
-                    replacement_px = &px_avg;
+                    &px_avg
                 }
                 true => {
-                    replacement_px = &GREEN_HIGHLIGHT_PX;
+                    &GREEN_HIGHLIGHT_PX
                 }
-            }
+            };
 
             match get_hot_pixel_index(px_subset, &px_avg, threshold) {
                 Some(x) => match x {
@@ -63,7 +62,7 @@ pub fn denoise(
         }
         row += 2
     }
-    Ok(image_details.save_image(DynamicImage::ImageRgb8(image_buf), &"denoised")?)
+    image_details.save_image(DynamicImage::ImageRgb8(image_buf), "denoised")
 }
 
 fn get_hot_pixel_index(

@@ -22,9 +22,9 @@ pub fn edge_detect(
     let height: u32 = image_details.height;
 
     let mut i: u32 = 1;
-    while i < width - 1 {
+    while i < width {
         let mut k: u32 = 1;
-        while k < height - 1 {
+        while k < height {
             // reduce each pixel's RGB values in the 2x2 grid to a single value
             let px_top_right: f32 = compute_rgb_distance(image_buf.get_pixel(i - 1, k));
             let px_top_left: f32 = compute_rgb_distance(image_buf.get_pixel(i - 1, k - 1));
@@ -60,7 +60,7 @@ pub fn edge_detect(
         i += 2;
     }
 
-    Ok(image_details.save_image(DynamicImage::ImageRgb8(image_buf), &"edges")?)
+    image_details.save_image(DynamicImage::ImageRgb8(image_buf), "edges")
 }
 
 fn compute_std_dev(

@@ -58,5 +58,5 @@ pub fn pixel_sort(
             }
         }
     }
-    Ok(image_details.save_image(DynamicImage::ImageRgb8(image_buf), &"pixelsorted")?)
+    image_details.save_image(DynamicImage::ImageRgb8(image_buf), "pixelsorted")
 }
