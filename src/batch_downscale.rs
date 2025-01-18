@@ -5,7 +5,6 @@ use crate::rw_image::ImageDetails;
 use crate::threadpool::ThreadPool;
 
 use glob::glob;
-use num_cpus;
 
 pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box<dyn Error>> {
     let pool: ThreadPool = ThreadPool::new(num_cpus::get()).unwrap();
@@ -51,7 +50,7 @@ pub fn batch_downscale(directory: String, file_format: String) -> Result<(), Box
     Ok(())
 }
 
-fn check_or_create_subdir(directory: &String, subdir_name: &PathBuf) -> bool {
+fn check_or_create_subdir(directory: &str, subdir_name: &PathBuf) -> bool {
     let path_to_new_subdir: PathBuf = [directory, subdir_name.to_str().unwrap()].iter().collect();
     if !path_to_new_subdir.is_dir() {
         match fs::create_dir(path_to_new_subdir) {

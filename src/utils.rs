@@ -1,20 +1,19 @@
-///
-/// This utils.rs file holds utility functions that
-/// are used in two or more locations.
-/// If a function is only used only in a single location,
-/// then it should should not live here.
-///
-/// I think it is more helpful to have helper methods live near
-/// where they are 'used', but if that helper method is
-/// general enough to have utility in other parts of the code,
-/// then it should live in utils.rs
-///
+//
+// This utils.rs file holds utility functions that
+// are used in two or more locations.
+// If a function is only used in one location,
+// then it should should not live here.
+//
+// I think it is more helpful to have helper methods live near
+// where they are 'used', but if that helper method has utility
+// in other parts of the code, then it should live in utils.rs
+//
 
 pub fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {
     f32::sqrt(
-        f32::powf(pixel[0] as f32, 2.0)
-            + f32::powf(pixel[1] as f32, 2.0)
-            + f32::powf(pixel[2] as f32, 2.0),
+        f32::powf(pixel[0] as f32, 2.0) +
+            f32::powf(pixel[1] as f32, 2.0) +
+            f32::powf(pixel[2] as f32, 2.0),
     )
 }
 

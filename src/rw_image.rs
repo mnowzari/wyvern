@@ -36,7 +36,7 @@ impl ImageDetails {
             self.extension.to_str().unwrap()
         ));
 
-        let mut save_path: PathBuf = PathBuf::from(format!("{}", self.basedir.to_str().unwrap()));
+        let mut save_path: PathBuf = PathBuf::from(self.basedir.to_str().unwrap());
         save_path.push(filename);
 
         self.filepath = save_path.clone();
@@ -62,16 +62,16 @@ impl ImageDetails {
 
         let file_ext: &OsStr = match path.extension() {
             Some(x) => x,
-            None => &OsStr::new(""),
+            None => OsStr::new(""),
         };
 
         let file_name: &OsStr = match path.file_stem() {
             Some(x) => x,
-            None => &OsStr::new(""),
+            None => OsStr::new(""),
         };
 
         ImageDetails {
-            filepath: PathBuf::from(path.clone()),
+            filepath: path.clone(),
             basedir: PathBuf::from(base_dir),
             filename: PathBuf::from(file_name),
             extension: PathBuf::from(file_ext),

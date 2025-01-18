@@ -1,6 +1,6 @@
-/// This code is largely based on the thread pooling
-/// implementation found in the Rust Book:
-/// https://doc.rust-lang.org/beta/book/ch20-02-multithreaded.html
+// This code is largely based on the thread pooling
+// implementation found in the Rust Book:
+// https://doc.rust-lang.org/beta/book/ch20-02-multithreaded.html
 
 #[allow(dead_code, unused)]
 use core::fmt;

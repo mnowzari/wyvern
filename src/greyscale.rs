@@ -23,5 +23,5 @@ pub fn greyscale_convert(mut image_details: ImageDetails) -> Result<bool, Box<dy
         }
     }
 
-    Ok(image_details.save_image(DynamicImage::ImageLuma8(output_buf), &"greyscale")?)
+    image_details.save_image(DynamicImage::ImageLuma8(output_buf), "greyscale")
 }

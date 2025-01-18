@@ -37,5 +37,5 @@ pub fn image_downscale(image_details: &mut ImageDetails) -> Result<bool, Box<dyn
         i += 2;
     }
 
-    Ok(image_details.save_image(DynamicImage::ImageRgb8(output_buf), &"downscaled")?)
+    image_details.save_image(DynamicImage::ImageRgb8(output_buf), "downscaled")
 }
