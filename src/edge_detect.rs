@@ -21,15 +21,15 @@ pub fn edge_detect(
     let width: u32 = image_details.width;
     let height: u32 = image_details.height;
 
-    let mut i: u32 = 1;
-    while i < width {
-        let mut k: u32 = 1;
-        while k < height {
+    let mut row: u32 = 1;
+    while row < width {
+        let mut col: u32 = 1;
+        while col < height {
             // reduce each pixel's RGB values in the 2x2 grid to a single value
-            let px_top_right: f32 = compute_rgb_distance(image_buf.get_pixel(i - 1, k));
-            let px_top_left: f32 = compute_rgb_distance(image_buf.get_pixel(i - 1, k - 1));
-            let px_bottom_right: f32 = compute_rgb_distance(image_buf.get_pixel(i, k));
-            let px_bottom_left: f32 = compute_rgb_distance(image_buf.get_pixel(i, k - 1));
+            let px_top_right: f32 = compute_rgb_distance(image_buf.get_pixel(row - 1, col));
+            let px_top_left: f32 = compute_rgb_distance(image_buf.get_pixel(row - 1, col - 1));
+            let px_bottom_right: f32 = compute_rgb_distance(image_buf.get_pixel(row, col));
+            let px_bottom_left: f32 = compute_rgb_distance(image_buf.get_pixel(row, col - 1));
             // get the mean of all four pixels
             let mean: f32 = (px_top_right + px_top_left + px_bottom_left + px_bottom_right) / 4.0;
             // compute the standard deviation between each pixel in the grid and the mean of the 2x2 grid
@@ -44,20 +44,20 @@ pub fn edge_detect(
             );
 
             if blackout {
-                image_buf.put_pixel(i - 1, k, BLACKOUT_PX);
-                image_buf.put_pixel(i - 1, k - 1, BLACKOUT_PX);
-                image_buf.put_pixel(i, k, BLACKOUT_PX);
-                image_buf.put_pixel(i, k - 1, BLACKOUT_PX);
+                image_buf.put_pixel(row - 1, col, BLACKOUT_PX);
+                image_buf.put_pixel(row - 1, col - 1, BLACKOUT_PX);
+                image_buf.put_pixel(row, col, BLACKOUT_PX);
+                image_buf.put_pixel(row, col - 1, BLACKOUT_PX);
             }
 
             // compare the resultant distance to the threshold
             if std_dev > threshold {
-                image_buf.put_pixel(i, k, GREEN_HIGHLIGHT_PX);
+                image_buf.put_pixel(row, col, GREEN_HIGHLIGHT_PX);
             }
 
-            k += 2;
+            col += 2;
         }
-        i += 2;
+        row += 2;
     }
 
     image_details.save_image(DynamicImage::ImageRgb8(image_buf), "edges")
