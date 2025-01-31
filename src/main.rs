@@ -1,6 +1,7 @@
 #[allow(dead_code, unused)]
 use clap::Parser;
 
+mod batch;
 mod batch_downscale;
 mod cli;
 mod denoise;
