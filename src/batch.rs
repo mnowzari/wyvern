@@ -67,42 +67,46 @@ impl BatchCoordinator {
         let path = PathBuf::from(path_from_cli.unwrap())
             .canonicalize()
             .unwrap();
-
-        let base_dir: &OsStr = path.parent().unwrap().as_os_str();
-        let mut file_name: Option<&OsStr> = None;
-        let file_ext: &OsStr = match path.extension() {
-            Some(x) => {
-                file_name = path.file_name(); // grab filename if this is a dir
-                x
-            },
-            None => OsStr::new(""),
-        };
-
-        // pass arguments along to gather_and_queue_images() too!
-
-        Ok(self.gather_and_queue_images(base_dir, file_ext, file_name)?)
+        
+        // let's do a basic implementation for now
+        // we can make this fancy later
+        if path.is_file() {
+            self.gather_and_queue_images(path.as_os_str(), None)?;
+        }
+        else if path.is_dir() {
+            let base_dir: &OsStr = path.as_os_str();
+            let file_ext: Option<&OsStr> = Some(&OsStr::new("jpg"));
+            // pass arguments along to gather_and_queue_images() too!
+            self.gather_and_queue_images(base_dir, file_ext).expect(
+                "Error during the gather and queue step!"
+            );
+        }
+        else {
+            panic!("No file name or extension could be found in the provided path!");
+        }
+        Ok(())
     }
 
     pub fn gather_and_queue_images(
         &mut self,
         directory: &OsStr,
-        file_format: &OsStr,
-        file_name: Option<&OsStr>,
+        file_format: Option<&OsStr>,
     ) -> Result<(), Box<dyn Error>> {
     
         // ensure the provided dir is valid
-        if !PathBuf::from(&directory).is_dir() {
-            panic!("The provided path is not a valid directory!");
+        if !PathBuf::from(&directory).exists() {
+            panic!("The provided path is not valid!");
         }
 
-        // create glob pattern
-        let wildcard: &OsString = &OsString::from("*.");
+        let mut glob_pattern: OsString = OsString::from("*.");
         let pattern_components: Vec<&OsStr>;
-        match file_name {
-            Some(filename) => {
-                pattern_components = vec![&directory, &filename];
+        match file_format { // if this is not a single image, but a path to a directory
+            Some(extension) => {
+                // create glob pattern
+                glob_pattern.push(extension);
+                pattern_components = vec![&directory, &glob_pattern];
             }
-            None => pattern_components = vec![&directory, &wildcard, &file_format],
+            None => pattern_components = vec![&directory]
         }
         let pattern: PathBuf = pattern_components.iter().collect();
         println!("Searching {}\n", pattern.to_str().unwrap());
@@ -119,11 +123,11 @@ impl BatchCoordinator {
                         arguments: Vec::new(),
                         processed: false,
                     });
-                    println!("Size of queue: {}", self.job_queue.len());
                 }
                 Err(e) => println!("{:?}", e),
             }
         }
+        println!("Size of queue: {}", self.job_queue.len());
         Ok(())
     }
 }
