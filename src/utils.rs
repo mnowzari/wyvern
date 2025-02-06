@@ -11,9 +11,9 @@
 
 pub fn compute_rgb_distance(pixel: &image::Rgb<u8>) -> f32 {
     f32::sqrt(
-        f32::powf(pixel[0] as f32, 2.0) +
-            f32::powf(pixel[1] as f32, 2.0) +
-            f32::powf(pixel[2] as f32, 2.0),
+        f32::powf(pixel[0] as f32, 2.0)
+            + f32::powf(pixel[1] as f32, 2.0)
+            + f32::powf(pixel[2] as f32, 2.0),
     )
 }
 

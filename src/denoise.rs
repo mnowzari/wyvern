@@ -39,21 +39,19 @@ pub fn denoise(
                 average_pixel_values(px_subset[0], px_subset[1], px_subset[2], px_subset[3]);
 
             let replacement_px: &Rgb<u8> = match highlight {
-                false => {
-                    &px_avg
-                }
-                true => {
-                    &GREEN_HIGHLIGHT_PX
-                }
+                false => &px_avg,
+                true => &GREEN_HIGHLIGHT_PX,
             };
 
-            if let Some(x) = get_hot_pixel_index(px_subset, &px_avg, threshold) { match x {
-                0 => image_buf.put_pixel(row - 1, col, *replacement_px),
-                1 => image_buf.put_pixel(row - 1, col - 1, *replacement_px),
-                2 => image_buf.put_pixel(row, col, *replacement_px),
-                3 => image_buf.put_pixel(row, col - 1, *replacement_px),
-                _ => {}
-            } }
+            if let Some(x) = get_hot_pixel_index(px_subset, &px_avg, threshold) {
+                match x {
+                    0 => image_buf.put_pixel(row - 1, col, *replacement_px),
+                    1 => image_buf.put_pixel(row - 1, col - 1, *replacement_px),
+                    2 => image_buf.put_pixel(row, col, *replacement_px),
+                    3 => image_buf.put_pixel(row, col - 1, *replacement_px),
+                    _ => {}
+                }
+            }
 
             col += 2
         }
