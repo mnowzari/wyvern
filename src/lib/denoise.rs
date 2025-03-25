@@ -1,11 +1,8 @@
 use std::error::Error;
 
-use crate::{
-    rw_image::ImageDetails,
-    utils::{average_pixel_values, calc_distance},
-};
-
 use image::{DynamicImage, ImageBuffer, Rgb};
+
+use super::{rw_image::ImageDetails, utils::{average_pixel_values, calc_distance}};
 
 const GREEN_HIGHLIGHT_PX: Rgb<u8> = Rgb([0, 255, 0]);
 

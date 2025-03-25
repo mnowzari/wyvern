@@ -1,8 +1,8 @@
-use crate::{rw_image::ImageDetails, utils::average_of_single_rgb_pixel};
-
 use image::{DynamicImage, ImageBuffer, Luma, Rgb};
 
 use std::error::Error;
+
+use super::{rw_image::ImageDetails, utils::average_of_single_rgb_pixel};
 
 pub fn greyscale_convert(mut image_details: ImageDetails) -> Result<bool, Box<dyn Error>> {
     let image_buf: ImageBuffer<Rgb<u8>, Vec<u8>> = image_details

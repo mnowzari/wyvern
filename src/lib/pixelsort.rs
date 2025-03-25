@@ -1,9 +1,11 @@
-use crate::{cli::PixelSortDir, rw_image::ImageDetails, utils::calc_distance};
-
 use image::{DynamicImage, ImageBuffer, Rgb};
 
 use rand::Rng;
 use std::error::Error;
+
+use crate::cli::PixelSortDir;
+
+use super::{rw_image::ImageDetails, utils::calc_distance};
 
 pub fn pixel_sort(
     image_details: &mut ImageDetails,

@@ -1,8 +1,8 @@
-use crate::{rw_image::ImageDetails, utils::compute_rgb_distance};
-
 use image::{DynamicImage, ImageBuffer, Rgb};
 
 use std::error::Error;
+
+use super::{rw_image::ImageDetails, utils::compute_rgb_distance};
 
 const GREEN_HIGHLIGHT_PX: Rgb<u8> = Rgb([0, 255, 0]);
 const BLACKOUT_PX: Rgb<u8> = Rgb([0, 0, 0]);

@@ -1,8 +1,8 @@
-use crate::{rw_image::ImageDetails, utils::average_pixel_values};
-
 use image::{DynamicImage, ImageBuffer, Rgb};
 
 use std::error::Error;
+
+use super::{rw_image::ImageDetails, utils::average_pixel_values};
 
 const DOWNSCALE_FACTOR: u32 = 2;
 

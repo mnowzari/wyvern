@@ -24,100 +24,107 @@
 
 use glob::glob;
 use std::{
-    collections::VecDeque,
+    collections::{HashMap, VecDeque},
     error::Error,
     ffi::{OsStr, OsString},
     path::PathBuf,
     sync::{Arc, Mutex},
 };
 
-use crate::{cli, rw_image::ImageDetails, threadpool::ThreadPool};
+use crate::{cli, lib::rw_image::ImageDetails};
 
 // ==========================================
-struct BatchJob {
-    image_details: ImageDetails,
-    arguments: Vec<String>,
-    processed: bool,
+pub struct BatchJob {
+    pub image_details: ImageDetails,
+    pub arguments: HashMap<String, String>,
+    pub processed: bool,
 }
 
 // ==========================================
 pub struct BatchCoordinator {
     // job_queue: VecDeque<BatchJob>,
     pub job_queue: Arc<Mutex<VecDeque<BatchJob>>>,
-    pub thread_pool: ThreadPool,
 }
 
 impl BatchCoordinator {
-    pub fn new(number_of_threads: usize) -> Result<Self, Box<dyn Error>> {
+    pub fn new() -> Result<Self, Box<dyn Error>> {
         Ok(BatchCoordinator {
             job_queue: Arc::new(Mutex::new(VecDeque::new())),
-            thread_pool: ThreadPool::new(number_of_threads)
-                .expect("There was an issue starting the thread pool!"),
         })
     }
 
-    fn get_path_from_args(&mut self, args: cli::InputArguments) -> Vec<String> {
-        let mut arglist: Vec<String> = vec![]; // maybe this could be a hashmap?
+    fn transform_args(&mut self, args: cli::InputArguments) -> HashMap<String, String> {
+        let mut cmd_and_arg: HashMap<String, String> = HashMap::new();
         match args.command {
             cli::ImageCommand::EdgeDetect {
                 path,
                 threshold,
                 blackout,
             } => {
-                arglist.push(path.unwrap());
-                arglist.push(threshold.to_string());
-                arglist.push(blackout.to_string());
+                cmd_and_arg.insert("cmd".to_string(), "edgedetect".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
+                cmd_and_arg.insert("threshold".to_string(), threshold.to_string());
+                cmd_and_arg.insert("blackout".to_string(), blackout.to_string());
             }
             cli::ImageCommand::BatchDownscale { path, extension } => {
-                arglist.push(path.unwrap());
-                arglist.push(extension.unwrap());
+                cmd_and_arg.insert("cmd".to_string(), "batchdownscale".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
+                cmd_and_arg.insert("extension".to_string(), extension.unwrap());
             }
             cli::ImageCommand::PixelSort {
                 path,
                 threshold,
                 direction,
             } => {
-                arglist.push(path.unwrap());
-                arglist.push(threshold.to_string());
-                arglist.push(direction.unwrap().to_string());
+                cmd_and_arg.insert("cmd".to_string(), "pixelsort".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
+                cmd_and_arg.insert("threshold".to_string(), threshold.to_string());
+                cmd_and_arg.insert("direction".to_string(), direction.unwrap().to_string());
             }
             cli::ImageCommand::Denoise {
                 path,
                 threshold,
                 highlight,
             } => {
-                arglist.push(path.unwrap());
-                arglist.push(threshold.to_string());
-                arglist.push(highlight.to_string());
+                cmd_and_arg.insert("cmd".to_string(), "denoise".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
+                cmd_and_arg.insert("threshold".to_string(), threshold.to_string());
+                cmd_and_arg.insert("highlight".to_string(), highlight.to_string());
+
             }
             cli::ImageCommand::Greyscale { path } => {
-                arglist.push(path.unwrap());
+                cmd_and_arg.insert("cmd".to_string(), "greyscale".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
+
             }
             cli::ImageCommand::Downscale { path } => {
-                arglist.push(path.unwrap());
+                cmd_and_arg.insert("cmd".to_string(), "downscale".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
+
             }
             cli::ImageCommand::CommonColors { path } => {
-                arglist.push(path.unwrap());
+                cmd_and_arg.insert("cmd".to_string(), "commoncolors".to_string());
+                cmd_and_arg.insert("path".to_string(), path.unwrap());
             }
         }
-        arglist
+        cmd_and_arg
     }
 
     pub fn coordinate(&mut self, arguments: cli::InputArguments) -> Result<(), Box<dyn Error>> {
-        let list_of_arg_strings: Vec<String> = self.get_path_from_args(arguments);
-        let path_from_cli: &String = &list_of_arg_strings[0];
+        let cmd_map:HashMap<String, String>  = self.transform_args(arguments);
+        let path_from_cli: &String = &cmd_map.get("path").unwrap();
 
         let path = PathBuf::from(path_from_cli).canonicalize().unwrap();
 
         // let's do a basic implementation for now
         // we can make this fancy later
         if path.is_file() {
-            self.gather_and_queue_images(path.as_os_str(), None, list_of_arg_strings)?;
+            self.gather_and_queue_images(path.as_os_str(), None, cmd_map)?;
         } else if path.is_dir() {
             let base_dir: &OsStr = path.as_os_str();
             let file_ext: Option<&OsStr> = Some(&OsStr::new("jpg"));
             // pass arguments along to gather_and_queue_images() too!
-            self.gather_and_queue_images(base_dir, file_ext, list_of_arg_strings)
+            self.gather_and_queue_images(base_dir, file_ext, cmd_map)
                 .expect("Error during the gather and queue step!");
         } else {
             panic!("No file name or extension could be found in the provided path!");
@@ -129,7 +136,7 @@ impl BatchCoordinator {
         &mut self,
         directory: &OsStr,
         file_format: Option<&OsStr>,
-        arguments: Vec<String>,
+        arguments: HashMap<String, String>,
     ) -> Result<(), Box<dyn Error>> {
         // ensure the provided dir is valid
         if !PathBuf::from(&directory).exists() {

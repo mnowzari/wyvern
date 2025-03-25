@@ -1,12 +1,9 @@
-use crate::{
-    rw_image::ImageDetails,
-    utils::{average_pixel_values, calc_distance},
-};
-
 use image::{DynamicImage, ImageBuffer, Rgb};
 
 use rand::Rng;
 use std::error::Error;
+
+use super::{rw_image::ImageDetails, utils::{average_pixel_values, calc_distance}};
 
 const TEST_POINTS: usize = 24;
 const SAMPLE_POINTS: usize = 512;
