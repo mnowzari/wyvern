@@ -1,17 +1,12 @@
 #[allow(dead_code, unused)]
-use clap::Parser;
 
-mod batch_downscale;
+mod processing;
 mod cli;
-mod denoise;
-mod edge_detect;
-mod greyscale;
-mod image_downscale;
-mod kmeans;
-mod pixelsort;
-mod rw_image;
 mod threadpool;
 mod utils;
+
+use clap::Parser;
+use crate::processing::*;
 
 fn route_command(args: cli::InputArguments) {
     match args.command {
