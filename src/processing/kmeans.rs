@@ -44,7 +44,6 @@ pub fn k_means_fast(image_details: &mut ImageDetails) -> Result<bool, Box<dyn Er
         } else {
             // the rest become sample points that we can compare against the test points
             for (tp_idx, tp) in test_points.iter_mut().enumerate() {
-
                 let distance: f32 = calc_distance(
                     &(temp_px[0] as f32),
                     &(temp_px[1] as f32),

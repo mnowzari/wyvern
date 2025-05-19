@@ -1,12 +1,11 @@
-#[allow(dead_code, unused)]
-
-mod processing;
 mod cli;
+#[allow(dead_code, unused)]
+mod processing;
 mod threadpool;
 mod utils;
 
-use clap::Parser;
 use crate::processing::*;
+use clap::Parser;
 
 fn route_command(args: cli::InputArguments) {
     match args.command {
